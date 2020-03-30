@@ -1,3 +1,14 @@
+sono.ly is an open source web project for sound making. The app is split up into 3 parts.
+
+uploader - upload & edit a sound. you may edit by cutting, filtering, etc
+
+maker - record your own sound or make sounds on virtual instruments
+
+mixer - mix the sounds together
+
+---------
+
+
 # django-svelte
 A template for Django/Svelte single-page apps
 

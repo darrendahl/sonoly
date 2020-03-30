@@ -4,6 +4,9 @@ django_svelte_venv/
 # web
 frontend/web/node_modules/*
 frontend/web/build/*
+frontend/web/public/bundle.js
+frontend/web/public/bundle.js.map
+frontend/web/public/bundle.css
 # mobile
 frontend/mobile/node_modules/*
 frontend/mobile/build/*
@@ -22,3 +25,5 @@ pip-delete-this-directory.txt
 
 # VS Code python.env
 .vscode/python.env
+.env
+env/

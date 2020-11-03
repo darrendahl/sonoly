@@ -1,10 +1,31 @@
 <script>
+	import Pad from './Pad.svelte'
 	export let name;
+	const components = ['Pad', 'Keys'];
+
+
+	let current = 'Pad'
+
+	function setComponent(comp){
+		current = comp
+	}
+
 </script>
 
 <main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+	<h1>Sono.ly</h1>
+
+	<header>
+		{#each components as comp}
+			<div class="tab {current === comp ? 'selected' : ''}" on:click={() => setComponent(comp)}>{comp}</div>
+		{/each}
+
+	</header>
+	{#if current === 'Pad'}
+		<Pad />
+	{:else if current === 'Keys'}
+		<section>Keys</section>
+	{/if}
 </main>
 
 <style>
@@ -13,6 +34,29 @@
 		padding: 1em;
 		max-width: 240px;
 		margin: 0 auto;
+	}
+
+	.tab{
+		border: 1px solid #ff3e00;
+		padding: 4px;
+		width: 40px;
+		cursor: pointer;
+	}
+
+	.tab:hover, .tab.selected{
+		background: #ff3e00;
+		color: white;
+	}
+
+	section{
+		margin-top: 100px;
+	}
+
+	header {
+		display: flex;
+		margin: 0 auto;
+		width: 150px;
+		justify-content: space-between;
 	}
 
 	h1 {

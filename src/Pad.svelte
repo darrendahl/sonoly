@@ -1,8 +1,10 @@
 <script>
+  import sono from './sono'
 
   let m = {x: null, y: null}
   let prevM = {x: null, y: null}
   let to
+  let count = 0
   function handleMove(evt){
     var canvas = document.getElementById('pad');
 
@@ -15,33 +17,41 @@
     if (canvas.getContext) {
       var ctx = canvas.getContext('2d');
       ctx.beginPath();
-      ctx.fillStyle = 'blue';
+      ctx.fillStyle = '#ff3e00';
       // ctx.moveTo(m.x, m.y);
       ctx.fillRect(m.x, m.y, 1, 1);
       // ctx.stroke();
-      ctx.closePath()
+      // ctx.moveTo(prevM.x, prevM.y);
+      // ctx.lineTo(m.x, m.y);
+      // ctx.strokeStyle = 'blue';
+      // ctx.lineWidth = 1;
+      // ctx.stroke();
+      // ctx.closePath();
+      count++
 
-      ctx.beginPath();
-      ctx.moveTo(prevM.x, prevM.y);
-      ctx.lineTo(m.x, m.y);
-      ctx.strokeStyle = 'blue';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.closePath();
+      if(count % 10 === 0){
+        console.log(m, count)
+        sono().playSweep(m, true)
+      }
+
 
       clearTimeout(to)
       to = setTimeout(() => {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
-      }, 50)
+      }, 100)
     }
 
 
   }
 
+  function stopPlaying(){
+    sono().stop()
+  }
+
 
 </script>
 
-<canvas id="pad" width="250" height="250" on:mousemove={handleMove}></canvas>
+<canvas id="pad" width="500" height="250" on:mousemove={handleMove} on:mouseout={stopPlaying}></canvas>
 
 <style>
   canvas{

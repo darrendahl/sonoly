@@ -1,31 +1,36 @@
 <script>
 	import Pad from './Pad.svelte'
-	export let name;
+	import { initSono } from './sono'
 	const components = ['Pad', 'Keys'];
 
-
-	let current = 'Pad'
+	let current = ''
+	let started = false
 
 	function setComponent(comp){
+		if(!started) start()
 		current = comp
+	}
+
+	function start(){
+		initSono()
+		started = true
 	}
 
 </script>
 
 <main>
 	<h1>Sono.ly</h1>
+ <header>
+			{#each components as comp}
+				<div class="tab {current === comp ? 'selected' : ''}" on:click={() => setComponent(comp)}>{comp}</div>
+			{/each}
 
-	<header>
-		{#each components as comp}
-			<div class="tab {current === comp ? 'selected' : ''}" on:click={() => setComponent(comp)}>{comp}</div>
-		{/each}
-
-	</header>
-	{#if current === 'Pad'}
-		<Pad />
-	{:else if current === 'Keys'}
-		<section>Keys</section>
-	{/if}
+		</header>
+		{#if current === 'Pad'}
+			<Pad />
+		{:else if current === 'Keys'}
+			<section>Keys</section>
+		{/if}
 </main>
 
 <style>

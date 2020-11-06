@@ -1,7 +1,5 @@
 <script>
-	import Pad from './Pad.svelte'
-	import { loadOptions } from './api.js';
-	import Select from 'svelte-select'
+	import Pad from './Pad.svelte'	
 
 	import { initSono } from './sono'
 	const components = ['Pad', 'Keys'];
@@ -19,13 +17,9 @@
 		started = true
 	}
 
-	const optionIdentifier = 'id';
-  const getOptionLabel = (option) => option.title;
-  const getSelectionLabel = (option) => option.title;
-
 </script>
 
-<main>
+<main id="main">
 	<h1>Sono.ly</h1>
  <header>
 			{#each components as comp}
@@ -34,9 +28,7 @@
 
 		</header>
 		{#if current === 'Pad'}
-			<div class="select">
-				<Select {loadOptions} {optionIdentifier} {getSelectionLabel} {getOptionLabel} placeholder="Search wavetables"></Select>
-			</div>
+			
 			<Pad />
 		{:else if current === 'Keys'}
 			<section>Keys</section>
@@ -58,11 +50,6 @@
 		cursor: pointer;
 	}
 
-	.select {
-		width: 200px;
-    margin: 0 auto;
-    margin-top: 25px;
-	}
 
 	.tab:hover, .tab.selected{
 		background: #ff3e00;

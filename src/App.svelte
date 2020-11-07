@@ -1,5 +1,6 @@
 <script>
 	import Pad from './Pad.svelte'	
+	import Keys from './Keys.svelte'
 
 	import { initSono } from './sono'
 	const components = ['Pad', 'Keys', 'Looper'];
@@ -28,10 +29,9 @@
 
 		</header>
 		{#if current === 'Pad'}
-			
 			<Pad />
 		{:else if current === 'Keys'}
-			<section>Keys</section>
+			<Keys />
 		{:else if current === 'Looper'}
 			<section>Looper</section>
 		{/if}
@@ -48,7 +48,6 @@
 	.tab{
 		border: 1px solid #ff3e00;
 		padding: 4px;
-		width: 40px;
 		cursor: pointer;
 	}
 
@@ -65,7 +64,7 @@
 	header {
 		display: flex;
 		margin: 0 auto;
-		width: 150px;
+		width: 250px;
 		justify-content: space-between;
 	}
 

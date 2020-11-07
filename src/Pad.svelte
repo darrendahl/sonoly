@@ -117,7 +117,7 @@
 
   const handleSelect = async (event) => {
     loadingLock('on')
-    const response = await axios.get(event.detail.url)
+    const response = await axios.get(event.detail.file)
     console.log('loaded', event.detail.title)
     loadingLock('off')
     wavetableData = response.data
@@ -133,7 +133,7 @@
 </script>
 
 <div class="select">
-  <Select {items} {optionIdentifier} {getSelectionLabel} {getOptionLabel} bind:selectedWavetable on:select={handleSelect} placeholder="Search wavetables"></Select>
+  <Select {items} {optionIdentifier} {getSelectionLabel} {getOptionLabel} bind:selectedWavetable on:select={handleSelect} placeholder="Select Wavetable"></Select>
 </div>
 
 <canvas id="pad" width="500" height="250" on:mousedown={handleDown} on:mousemove={handleMove} on:mouseout={stopPlaying} on:mouseup={stopPlaying}></canvas>

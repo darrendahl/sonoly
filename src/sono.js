@@ -1,12 +1,10 @@
-import defaultWavetable from './wavetables/Bass'
-
 function initSono(){
 	const AudioContext = window.AudioContext || window.webkitAudioContext;
 	window.audioCtx = new AudioContext();	
 }
 
 function playSweep({x,y}, wavetableData) {
-	const wavetable = wavetableData ? wavetableData : defaultWavetable
+	const wavetable = wavetableData ? wavetableData : null
 	
 	if(!window.wave || !window.osc){
 		window.wave = audioCtx.createPeriodicWave(wavetable.real, wavetable.imag, {disableNormalization: true});

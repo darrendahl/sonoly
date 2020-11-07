@@ -2,7 +2,7 @@
 	import Pad from './Pad.svelte'	
 
 	import { initSono } from './sono'
-	const components = ['Pad', 'Keys'];
+	const components = ['Pad', 'Keys', 'Looper'];
 
 	let current = ''
 	let started = false
@@ -32,6 +32,8 @@
 			<Pad />
 		{:else if current === 'Keys'}
 			<section>Keys</section>
+		{:else if current === 'Looper'}
+			<section>Looper</section>
 		{/if}
 </main>
 

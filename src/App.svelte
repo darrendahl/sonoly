@@ -1,7 +1,6 @@
 <script>
 	import Pad from './Pad.svelte'	
 	import Keys from './Keys.svelte'
-
 	import { initSono } from './sono'
 	const components = ['Pad', 'Keys', 'Looper'];
 

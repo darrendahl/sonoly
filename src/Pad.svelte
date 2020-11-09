@@ -1,5 +1,5 @@
 <script>
-  import sono from './sono'
+  import {playSweep, stopSweep} from './sono'
   import { loadWavetables, loadingLock } from './api.js';
   import Select from 'svelte-select'
   import axios from 'axios'
@@ -50,7 +50,7 @@
       // ctx.closePath();
       count++
 
-      sono().playSweep(m, wavetableData)
+      playSweep(m, wavetableData)
 
 
       clearTimeout(to)
@@ -92,7 +92,7 @@
 
       if(count % 10 === 0){
         console.log(m, count)
-        sono().playSweep(m, wavetableData)
+        playSweep(m, wavetableData)
       }
 
 
@@ -107,7 +107,7 @@
 
   function stopPlaying(){
     down = false
-    sono().stop()
+    stopSweep()
   }
 
   const loadOptions = async () => {

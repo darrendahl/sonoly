@@ -9,32 +9,43 @@
 	let started = false
 
 	function setComponent(comp){
-		if(!started) start()
 		current = comp
 	}
 
 	function start(){
 		initSono()
 		started = true
+		current = 'Keys'
 	}
 
 </script>
 
 <main id="main">
 	<h1>Sono.ly</h1>
- <header>
-			{#each components as comp}
-				<div class="tab {current === comp ? 'selected' : ''}" on:click={() => setComponent(comp)}>{comp}</div>
-			{/each}
-
-		</header>
-		{#if current === 'Pad'}
-			<Pad />
-		{:else if current === 'Keys'}
-			<Keys />
-		{:else if current === 'Loopers'}
-			<Looper />
-		{/if}
+	{#if !started}
+		<div class="tab start" on:click={start}>
+			Start
+		</div>
+	{:else}
+		<section class="block-container">
+			 <header>
+				{#each components as comp}
+					<div class="tab {current === comp ? 'selected' : ''}" on:click={() => setComponent(comp)}>{comp}</div>
+				{/each}
+			</header>
+			<div class="instrument {current === 'Keys' ? 'show' : 'hide'}">
+				{#if current === 'Keys'}
+					<Keys />
+				{/if}
+			</div>
+			<div class="instrument {current === 'Loopers' ? 'show' : 'hide'}">
+				<Looper />
+			</div>	
+			<div class="instrument {current === 'Pad' ? 'show' : 'hide'}">
+				<Pad />
+			</div>
+		</section>
+	{/if}
 </main>
 
 <style>
@@ -44,6 +55,19 @@
 		max-width: 240px;
 		margin: 0 auto;
 	}
+	.start {
+		width: 80px; 
+		margin: 0 auto; 
+		margin-top: -24px; 
+	}
+
+	.hide {
+		display: none;
+	}
+
+	.show {
+		display: block;
+	}
 
 	.tab{
 		border: 1px solid #ff3e00;
@@ -51,14 +75,17 @@
 		cursor: pointer;
 	}
 
+	.block-container {
+		/*border: 1px solid #efefef;*/
+		/*background: #fdfdfd;*/
+		padding: 24px;
+		width: 800px;
+		margin: 0 auto;
+	}
 
 	.tab:hover, .tab.selected{
 		background: #ff3e00;
 		color: white;
-	}
-
-	section{
-		margin-top: 100px;
 	}
 
 	header {

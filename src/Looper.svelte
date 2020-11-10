@@ -1,5 +1,5 @@
 <script>
-  import { playNote, stopNote, loadFile, loadSounds, playSound, stopSound, startLoop, changePlaybackRate, getIsPlaying } from "./sono";
+  import { playNote, stopNote, loadFile, loadSounds, playSound, stopSound, startLoop, changePlaybackRate, getIsPlaying, stopLoop } from "./sono";
   import { onDestroy } from "svelte";
   import { loadLoops, loadingLock } from "./api.js";
   import Select from "svelte-select";
@@ -7,23 +7,31 @@
   import shortid from 'shortid'
 
   let loopers = [
-    {title: 'Beat', options: [], id: shortid.generate()}, 
-    {title: 'Instrumental', options: [], id: shortid.generate()}, 
-    {title: 'Vocal', options: [], id: shortid.generate()}, 
-    {title: 'Other', options: [], id: shortid.generate()}
+    {title: 'Beat', options: [], id: shortid.generate(), count: 0}, 
+    {title: 'Instrumental', options: [], id: shortid.generate(), count: 0}, 
+    {title: 'Vocal', options: [], id: shortid.generate(), count: 0}, 
+    {title: 'Other', options: [], id: shortid.generate(), count: 0}
   ];
 
   let items
   let selectedOption
-  let counter = {id: '', count: 0}
+  let counterMap = {}
+  let isPlayingMap = {}
 
   onDestroy(() => {
     
   });
 
   const optionIdentifier = "uuid";
-  const getOptionLabel = option => `${option.title} - ${option.bpm}BPM`;
+  const getOptionLabel = option => `${option.title} - ${option.bpm} bpm`;
   const getSelectionLabel = option => `${option.title}`;
+
+  // Advanced Looper Settings:
+  // Bars: loop starts after x bars (default 1)
+  // Time signature: 4/4 (disabled)
+  // Time offset: in seconds (default 0)
+
+  // add ability for a ghost looper (only for keeping time, doesnt play anything)
 
   function changeBpm(e, looper){
     const loop = looper.selected
@@ -43,22 +51,18 @@
   };
 
   const handleStartLoop = (loop) => {
-    let  countNum = startLoop(loop)
-
-
-    loopers = loopers.map((l) => l.id === loop.id ? ({...l, isPlaying: true}): l)
-
+    let countNum = startLoop(loop)    
     if(countNum !== 0){
-      counter = {id: loop.id, count: countNum}
       const interval = setInterval(() => {
-        counter = {
-          id: loop.id,
-          count: counter.count - 1
-        }
-        if(counter.count === 0){
+        countNum = Number(Number(countNum - 0.1).toFixed(1))
+        loopers = loopers.map((l) => l.id === loop.id ? ({...l, count: countNum}): l)
+        if(countNum <= 0){
+          loopers = loopers.map((l) => l.id === loop.id ? ({...l, isPlaying: true, count: 0}): l)
           clearInterval(interval)
         }  
-      }, 1000)
+      }, 100)
+    } else {
+      loopers = loopers.map((l) => l.id === loop.id ? ({...l, isPlaying: true }) : l)
     }
   }
 
@@ -68,20 +72,19 @@
   }
 
   const handleStopLoop = (loop) => {
-    let  countNum = stopLoop(loop)
-    loopers = loopers.map((l) => l.id === loop.id ? ({...l, isPlaying: false}): l)
-
+    let countNum = stopLoop(loop)
     if(countNum !== 0){
-      counter = {id: loop.id, count: countNum}
       const interval = setInterval(() => {
-        counter = {
-          id: loop.id,
-          count: counter.count - 1
-        }
-        if(counter.count === 0){
+        countNum = Number(Number(countNum - 0.1).toFixed(1))
+        loopers = loopers.map((l) => l.id === loop.id ? ({...l, count: countNum}): l)
+
+        if(countNum <= 0){
+          loopers = loopers.map((l) => l.id === loop.id ? ({...l, isPlaying: false, count: 0}): l)
           clearInterval(interval)
         }  
-      }, 1000)
+      }, 100)
+    } else {
+      loopers = loopers.map((l) => l.id === loop.id ? ({...l, isPlaying: false }) : l)
     }
   }
 
@@ -207,19 +210,14 @@
 
         {#if loop.selected}
           <div class="controls-container">
-            {#if !loop.isPlaying}
-              <div class="tab" on:click={() => handleStartLoop(loop)}>Start Loop</div>
+            {#if loop.count > 0}
+                <div class="tab" on:click={() => handleStopLoop(loop)}>{Number(loop.count).toFixed(1)}</div>
             {:else }
-              {#if counter.id === loop.id && counter.count !== 0 }
-                <div class="tab" on:click={() => handleStopLoop(loop)}>{counter.count}</div>
-              {:else}
+              {#if loop.isPlaying }
                 <div class="tab" on:click={() => handleStopLoop(loop)}>Stop Loop</div>
+              {:else}
+                <div class="tab" on:click={() => handleStartLoop(loop)}>Start Loop</div>
               {/if}
-            {/if}
-            {#if !loop.isPlaying}
-              <div class="tab">Play Once</div>
-            {:else }
-              <div class="tab" on:click={() => handleStopNow(loop)}>Stop Now</div>
             {/if}
             <div class="bpm-container">
               <input class="bpm" type="number" name="" value={loop.selected.bpm} placeholder="BPM" on:change={(e) => changeBpm(e, loop)} />

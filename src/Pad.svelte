@@ -24,9 +24,6 @@
 
   function handleDown(evt){
     var canvas = document.getElementById('pad');
-
-    console.log(evt)
-
     down = true
 
     var rect = canvas.getBoundingClientRect();
@@ -39,36 +36,19 @@
       var ctx = canvas.getContext('2d');
       ctx.beginPath();
       ctx.fillStyle = '#ff3e00';
-      // ctx.moveTo(m.x, m.y);
       ctx.fillRect(m.x, m.y, 2, 2);
-      // ctx.stroke();
-      // ctx.moveTo(prevM.x, prevM.y);
-      // ctx.lineTo(m.x, m.y);
-      // ctx.strokeStyle = 'blue';
-      // ctx.lineWidth = 1;
-      // ctx.stroke();
-      // ctx.closePath();
       count++
-
       playSweep(m, wavetableData)
-
-
       clearTimeout(to)
       to = setTimeout(() => {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
       }, 100)
     }
-
-
   }
 
   function handleMove(evt){
     if(!down) return
     var canvas = document.getElementById('pad');
-
-
-    console.log(evt)
-
     var rect = canvas.getBoundingClientRect();
 
     prevM = m
@@ -79,30 +59,18 @@
       var ctx = canvas.getContext('2d');
       ctx.beginPath();
       ctx.fillStyle = '#ff3e00';
-      // ctx.moveTo(m.x, m.y);
       ctx.fillRect(m.x, m.y, 2, 2);
-      // ctx.stroke();
-      // ctx.moveTo(prevM.x, prevM.y);
-      // ctx.lineTo(m.x, m.y);
-      // ctx.strokeStyle = 'blue';
-      // ctx.lineWidth = 1;
-      // ctx.stroke();
-      // ctx.closePath();
       count++
 
       if(count % 10 === 0){
-        console.log(m, count)
         playSweep(m, wavetableData)
       }
-
 
       clearTimeout(to)
       to = setTimeout(() => {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
       }, 100)
     }
-
-
   }
 
   function stopPlaying(){
@@ -112,13 +80,11 @@
 
   const loadOptions = async () => {
     items = await loadWavetables()
-    console.log(items)
   }
 
   const handleSelect = async (event) => {
     loadingLock('on')
     const response = await axios.get(event.detail.file)
-    console.log('loaded', event.detail.title)
     loadingLock('off')
     wavetableData = response.data
   }
@@ -128,8 +94,6 @@
   }
 
   loadOptions()
-
-
 </script>
 
 <div class="select">

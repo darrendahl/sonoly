@@ -1,6 +1,6 @@
 <script>
   import { playNote, stopNote, loadFile, loadSounds, playSound, stopSound } from "./sono";
-  import { onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { loadSoundKits, loadingLock } from "./api.js";
   import Select from "svelte-select";
   import axios from "axios";
@@ -63,8 +63,10 @@
     );
   }
 
-  window.addEventListener("keydown", pressKeyDown, false);
-  window.addEventListener("keyup", pressKeyUp, false);
+  onMount(() => {
+    window.addEventListener("keydown", pressKeyDown, false);
+    window.addEventListener("keyup", pressKeyUp, false);
+  })
 
   onDestroy(() => {
     window.removeEventListener("keydown", pressKeyDown, false);

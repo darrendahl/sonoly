@@ -92,33 +92,27 @@ function startLoop(loop) {
 	if(!sonoStore.baseLoop){
 		sonoStore.baseLoop = {
 			loop,
-			source: getSource(loop.id, 'looper')
+			source: getSource(loop.id, 'looper'),
+			timeStarted: audioCtx.currentTime
 		}
 		playSound(loop.id, 'looper', true)
-		sonoStore.baseLoop.timeStarted = audioCtx.currentTime
 		return 0
 	} else {
-		let ct = audioCtx.currentTime
 		let currentTime = (audioCtx.currentTime - sonoStore.baseLoop.timeStarted);
 		let playOn = BPM_TIME_KEY[String(sonoStore.baseLoop.loop.selected.bpm)]
-		const r = currentTime % playOn
-
 		let timeUntilPlay = playOn - ((currentTime % playOn) / sonoStore.baseLoop.source.playbackRate.value);
 		playSound(loop.id, 'looper', true, timeUntilPlay)
-		return Math.round(timeUntilPlay * 1000)
+		return Number(timeUntilPlay.toFixed(1))
 	}
 }
 
 function stopLoop(loop) {
-	let currentTime = (audioCtx.currentTime - sonoStore.baseLoop.timeStarted) * 1000;
-	let playOn = BPM_TIME_KEY[String(sonoStore.baseLoop.loop.selected.bpm)] * 1000
+	let currentTime = (audioCtx.currentTime - sonoStore.baseLoop.timeStarted);
+	let playOn = BPM_TIME_KEY[String(sonoStore.baseLoop.loop.selected.bpm)]
 	let timeUntilStop = playOn - ((currentTime % playOn) / sonoStore.baseLoop.source.playbackRate.value);
-
-	setTimeout(function(){
-		stopSound(loop.id, 'looper')
-	}, timeUntilStop)
-
-	return Math.round(timeUntilStop / 1000)
+	console.log(timeUntilStop, playOn, currentTime)
+	stopSound(loop.id, 'looper', timeUntilStop)
+	return Number(timeUntilStop.toFixed(1))
 }
 
 function changePlaybackRate(looper, newPlaybackRate){
@@ -126,9 +120,9 @@ function changePlaybackRate(looper, newPlaybackRate){
 	source.playbackRate.value = newPlaybackRate
 }
 
-function stopSound(playerId, playerType) {
+function stopSound(playerId, playerType, timeUntilStop=0) {
 	const { source } = sonoStore[`${playerId}_${playerType}`];
-	source.stop(audioCtx.currentTime);
+	source.stop(audioCtx.currentTime + timeUntilStop);
 	storeFile(source.buffer, playerId, playerType);
 }
 
@@ -187,5 +181,6 @@ export {
 	stopSound,
 	startLoop,
 	changePlaybackRate,
-	getIsPlaying
+	getIsPlaying,
+	stopLoop
 };

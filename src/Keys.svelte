@@ -20,7 +20,7 @@
         if (newSelected) {
           if(selectedSoundKit){
             if(key.uuid){
-              playSound(key.uuid)
+              playSound(key.code)
             } else {
               console.log('No sound assigned to key')
             }
@@ -46,7 +46,7 @@
         if(isKey){
           if(selectedSoundKit){
             if(key.uuid){
-              stopSound(key.uuid)
+              stopSound(key.code)
             } else {
               console.log('No sound assigned to key')
             }
@@ -71,7 +71,7 @@
     window.removeEventListener("keyup", pressKeyUp, false);
   });
 
-  const optionIdentifier = "id";
+  const optionIdentifier = "uuid";
   const getOptionLabel = option => option.title;
   const getSelectionLabel = option => option.title;
 
@@ -82,32 +82,29 @@
   const handleSelect = async (event) => {
     loadingLock('on')
     // const response = await axios.get(event.detail.file)
-    console.log(event)
     let newKeys
-    loadSounds(event.detail.sound_key_codes.map((s) => (s.sound)))
-    event.detail.sound_key_codes.forEach((item) => {
-      console.log(item)
+    await loadSounds(event.detail.sound_key_codes)
 
-      newKeys = keys.map(row =>
+    newKeys = keys.map(row =>
         row.map(key => {
-            if(Number(item.key_code.code) === key.code){
+            const found = event.detail.sound_key_codes.find((item) => {
+              return Number(item.key_code.code) === key.code
+            })
+
+            if(found){
               return {
                 ...key,
-                uuid: item.sound.uuid
+                uuid: found.sound.uuid
               }
             } else {
               return key
             }
         })
       )
-
-      // loadFile(item.sound.file, item.sound.uuid)
-    })
-
+   
     selectedSoundKit = event.detail
 
     keys = [...newKeys]
-    console.log(keys)
     loadingLock('off')
   }
 
@@ -156,6 +153,10 @@
     margin-top: 25px;
     margin-bottom: 25px;
   }
+
+  .disabled {
+    border:  1px solid #efefef;
+  }
 </style>
 
 <section>
@@ -175,7 +176,7 @@
     {#each keys as row}
     <div class="key-row">
       {#each row as key}
-      <div class="key {key.selected ? 'selected' : ''}" id="{key.code}">{key.note}</div>
+      <div class="key {key.selected ? 'selected' : ''} {selectedSoundKit && !key.uuid ? 'disabled' : ''}" id="{key.code}">{key.note}</div>
       {/each}
     </div>
     {/each}

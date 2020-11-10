@@ -11,9 +11,13 @@ export function loadingLock(action){
 }
 
 export function loadWavetables(){
-  return axios.get('http://localhost:8080/sounds/wavetables/').then((response) => response.data)
+  return axios.get('http://localhost:8081/sounds/wavetables/').then((response) => response.data)
 }
 
 export function loadSoundKits(){
-  return axios.get('http://localhost:8080/sounds/soundkits/').then((response) => response.data)
+  return axios.get('http://localhost:8081/sounds/soundkits/').then((response) => response.data)
+}
+
+export function loadLoops(){
+  return axios.get('http://localhost:8081/sounds/loops/').then((response) => response.data)
 }

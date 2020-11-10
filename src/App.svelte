@@ -1,8 +1,9 @@
 <script>
 	import Pad from './Pad.svelte'	
 	import Keys from './Keys.svelte'
+	import Looper from './Looper.svelte'
 	import { initSono } from './sono'
-	const components = ['Pad', 'Keys', 'Looper'];
+	const components = ['Keys', 'Loopers', 'Pad'];
 
 	let current = ''
 	let started = false
@@ -31,8 +32,8 @@
 			<Pad />
 		{:else if current === 'Keys'}
 			<Keys />
-		{:else if current === 'Looper'}
-			<section>Looper</section>
+		{:else if current === 'Loopers'}
+			<Looper />
 		{/if}
 </main>
 

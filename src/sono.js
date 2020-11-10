@@ -1,4 +1,5 @@
 import axios from "axios";
+import BPM_TIME_KEY from './bpm-time-key'
 
 function initSono() {
 	const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -7,7 +8,6 @@ function initSono() {
 }
 
 function stopNote(note) {
-	console.log(note, sonoStore);
 	if (sonoStore[`${note}_osc`] && sonoStore[`${note}_osc`].isPlaying) {
 		sonoStore[`${note}_osc`].osc.stop(audioCtx.currentTime);
 		sonoStore[`${note}_osc`] = null;
@@ -16,7 +16,6 @@ function stopNote(note) {
 
 function playNote(freq, note) {
 	let osc, isPlaying;
-	console.log(note, freq, sonoStore);
 	if (!sonoStore[`${note}_osc`] || !sonoStore[`${note}_osc`].isPlaying) {
 		sonoStore[`${note}_osc`] = {
 			osc: audioCtx.createOscillator()
@@ -55,84 +54,117 @@ function playSweep({ x, y }, wavetableData) {
 	}
 }
 
-function storeFile(buffer, uuid) {
+function storeFile(buffer, playerId, playerType) {
 	const source = audioCtx.createBufferSource();
 	source.buffer = buffer;
-	sonoStore[uuid] = source;
+	sonoStore[`${playerId}_${playerType}`] = {
+		source: source,
+		isPlaying: false
+	};
 }
 
 function loadFiles() {}
 
-function playSound(uuid){
-	const source = sonoStore[uuid]
-	source.connect(audioCtx.destination)
-	source.start(audioCtx.currentTime)
+function playSound(playerId, playerType, isLoop, timeUntilPlay = 0) {
+	if(!sonoStore[`${playerId}_${playerType}`]) return 
+
+	if (sonoStore[`${playerId}_${playerType}`].isPlaying) {
+		const newSource = audioCtx.createBufferSource();
+		newSource.buffer = sonoStore[`${playerId}_${playerType}`].source.buffer;
+		sonoStore[`${playerId}_${playerType}`] = {
+			source: newSource,
+			isPlaying: false
+		};
+	}
+
+	const { source, isPlaying } = sonoStore[`${playerId}_${playerType}`];
+	source.loop = isLoop
+	source.connect(audioCtx.destination);
+	source.start(audioCtx.currentTime + timeUntilPlay);
+	sonoStore[`${playerId}_${playerType}`].isPlaying = true;
 }
 
-
-function stopSound(uuid){
-	const source = sonoStore[uuid]
-	source.stop(audioCtx.currentTime)
-	storeFile(source.buffer, uuid)
+function getSource(playerId, playerType){
+	return sonoStore[`${playerId}_${playerType}`].source
 }
 
+function startLoop(loop) {
+	if(!sonoStore.baseLoop){
+		sonoStore.baseLoop = {
+			loop,
+			source: getSource(loop.id, 'looper')
+		}
+		playSound(loop.id, 'looper', true)
+		sonoStore.baseLoop.timeStarted = audioCtx.currentTime
+		return 0
+	} else {
+		let ct = audioCtx.currentTime
+		let currentTime = (audioCtx.currentTime - sonoStore.baseLoop.timeStarted);
+		let playOn = BPM_TIME_KEY[String(sonoStore.baseLoop.loop.selected.bpm)]
+		const r = currentTime % playOn
 
-// function loadFile(fileUrl, uuid) {
-//   
-//   var request = new XMLHttpRequest();
-//
-//   request.open('GET', fileUrl, true);
-//
-//   request.responseType = 'arraybuffer';
-//
-//
-//   request.onload = function() {
-//     var audioData = request.response;
-//     console.log(request.response)
-//
-//     audioCtx.decodeAudioData(audioData, function(buffer) {
+		let timeUntilPlay = playOn - ((currentTime % playOn) / sonoStore.baseLoop.source.playbackRate.value);
+		playSound(loop.id, 'looper', true, timeUntilPlay)
+		return Math.round(timeUntilPlay * 1000)
+	}
+}
 
-//         // source.loop = true;
-//       },
-//
-//       function(e){ console.log("Error with decoding audio data" + e.err); });
-//
-//   }
-//
-//   request.send();
-// }
+function stopLoop(loop) {
+	let currentTime = (audioCtx.currentTime - sonoStore.baseLoop.timeStarted) * 1000;
+	let playOn = BPM_TIME_KEY[String(sonoStore.baseLoop.loop.selected.bpm)] * 1000
+	let timeUntilStop = playOn - ((currentTime % playOn) / sonoStore.baseLoop.source.playbackRate.value);
 
-function loadSounds(sounds) {
-	const arr = sounds.map(s =>
-		axios({ method: "get", url: s.file, responseType: "arraybuffer" }).then(response => ({
+	setTimeout(function(){
+		stopSound(loop.id, 'looper')
+	}, timeUntilStop)
+
+	return Math.round(timeUntilStop / 1000)
+}
+
+function changePlaybackRate(looper, newPlaybackRate){
+	const source = getSource(looper.id, 'looper')
+	source.playbackRate.value = newPlaybackRate
+}
+
+function stopSound(playerId, playerType) {
+	const { source } = sonoStore[`${playerId}_${playerType}`];
+	source.stop(audioCtx.currentTime);
+	storeFile(source.buffer, playerId, playerType);
+}
+
+function loadSounds(soundKeys) {
+	const arr = soundKeys.map(sk =>
+		axios({ method: "get", url: sk.sound.file, responseType: "arraybuffer" }).then(response => ({
 			...response,
-			uuid: s.uuid
+			key_code: sk.key_code.code
 		}))
 	);
 
-	axios.all(arr).then(
+	return axios.all(arr).then(
 		axios.spread((...responses) => {
-			responses.forEach((r) => {
-				audioCtx.decodeAudioData(r.data, (buffer) => {
-					storeFile(buffer, r.uuid)
-				})
-			})
+			responses.forEach(r => {
+				audioCtx.decodeAudioData(r.data, buffer => {
+					storeFile(buffer, r.key_code, 'key');
+				});
+			});
 		})
 	);
 }
 
-function loadFile(fileUrl, uuid) {
-	axios({
+function loadFile(fileUrl, playerId, playerType) {
+	return axios({
 		method: "get",
 		url: fileUrl,
 		responseType: "arraybuffer"
 	}).then(response => {
-		console.log(response.data);
-
 		audioCtx.decodeAudioData(response.data, buffer => {
-			storeFile(buffer, uuid);
+			storeFile(buffer, playerId, playerType);
 		});
 	});
+}
+
+function getIsPlaying(playerId, playerType){
+	return sonoStore[`${playerId}_${playerType}`]?.isPlaying
 }
 
 function stopSweep() {
@@ -143,4 +175,17 @@ function stopSweep() {
 	sonoStore.osc = null;
 }
 
-export { initSono, playSweep, playNote, stopNote, stopSweep, loadFile, loadSounds, playSound, stopSound };
+export {
+	initSono,
+	playSweep,
+	playNote,
+	stopNote,
+	stopSweep,
+	loadFile,
+	loadSounds,
+	playSound,
+	stopSound,
+	startLoop,
+	changePlaybackRate,
+	getIsPlaying
+};

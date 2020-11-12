@@ -1,9 +1,17 @@
 <script>
-  import { playNote, stopNote, loadFile, loadSounds, playSound, stopSound, startLoop, changePlaybackRate, getIsPlaying, stopLoop } from "./sono";
+  // Advanced Looper Settings:
+  // Bars: loop starts after x bars (default 1)
+  // Bars: loop plays for x bars after starting (default ~)
+  // Time signature: 4/4 (disabled)
+  // Time offset: in seconds (default 0)
+  // add ability for a ghost looper (only for keeping time, doesnt play anything)
+  // disable timing
+  // disable looping
+
+  import { playNote, stopNote, loadFile, loadSounds, playSound, stopSound, startLoop, changeBpm, getIsPlaying, stopLoop } from "./sono";
   import { onDestroy } from "svelte";
   import { loadLoops, loadingLock } from "./api.js";
   import Select from "svelte-select";
-  import axios from "axios";
   import shortid from 'shortid'
 
   let loopers = [
@@ -26,18 +34,22 @@
   const getOptionLabel = option => `${option.title} - ${option.bpm} bpm`;
   const getSelectionLabel = option => `${option.title}`;
 
-  // Advanced Looper Settings:
-  // Bars: loop starts after x bars (default 1)
-  // Time signature: 4/4 (disabled)
-  // Time offset: in seconds (default 0)
 
-  // add ability for a ghost looper (only for keeping time, doesnt play anything)
+  function handleChangeBpm(e, looper){
+    const selectedLoop = looper.selected
+    const newBpm = Number(e.target.value)
+    console.log(selectedLoop, looper)
 
-  function changeBpm(e, looper){
-    const loop = looper.selected
-    const newBpm = e.target.value
-    const playbackRate = newBpm / loop.originalBpm
-    changePlaybackRate(looper, playbackRate)
+    const newLooper = {
+      ...looper,
+      selected: {
+        ...selectedLoop,
+        bpm: newBpm
+      }
+    }
+    console.log(looper, selectedLoop, loopers, newLooper)
+    loopers = loopers.map((l) => l.id === looper.id ? (newLooper): l)
+    changeBpm(newLooper, newBpm)
   }
 
   const loadOptions = async () => {
@@ -51,6 +63,7 @@
   };
 
   const handleStartLoop = (loop) => {
+    console.log(loop)
     let countNum = startLoop(loop)    
     if(countNum !== 0){
       const interval = setInterval(() => {
@@ -86,6 +99,19 @@
     } else {
       loopers = loopers.map((l) => l.id === loop.id ? ({...l, isPlaying: false }) : l)
     }
+  }
+
+  const handleClear = (looper) => {
+    loopers = loopers.map((l) => {
+      if(looper.title === l.title){
+        return {
+          ...l,
+          selected: null
+        }
+      } else {
+        return l
+      }
+    })
   }
 
   const handleSelect = async (event, looper) => {
@@ -194,40 +220,41 @@
 </style>
 
 <section>
-  <div class="select">
-
-  </div>
-
-  <section class="looper-container">
-    {#each loopers as loop}
-      <div class="looper">
-        <div class="loop-header">
-          {loop.title}
-        </div>
-        <div class="select">
-          <Select items={loop.options} {optionIdentifier} {getSelectionLabel} {getOptionLabel} on:select={(e) => handleSelect(e, loop)} placeholder="Select Loop"></Select>
-        </div>
-
-        {#if loop.selected}
-          <div class="controls-container">
-            {#if loop.count > 0}
-                <div class="tab" on:click={() => handleStopLoop(loop)}>{Number(loop.count).toFixed(1)}</div>
-            {:else }
-              {#if loop.isPlaying }
-                <div class="tab" on:click={() => handleStopLoop(loop)}>Stop Loop</div>
-              {:else}
-                <div class="tab" on:click={() => handleStartLoop(loop)}>Start Loop</div>
-              {/if}
-            {/if}
-            <div class="bpm-container">
-              <input class="bpm" type="number" name="" value={loop.selected.bpm} placeholder="BPM" on:change={(e) => changeBpm(e, loop)} />
-              {#if loop.selected.bpm}
-              <label class="bpm-label">BPM</label>
-              {/if}
+  <form>
+    <input type="hidden" autocomplete="false" name="">
+      <section class="looper-container">
+        {#each loopers as loop}
+          <div class="looper">
+            <div class="loop-header">
+              {loop.title}
             </div>
+            <div class="select">
+              <Select isDisabled={loop.isPlaying} items={loop.options} {optionIdentifier} {getSelectionLabel} {getOptionLabel}
+              on:clear={(e) => handleClear(loop)}
+              on:select={(e) => handleSelect(e, loop)}  placeholder="Sounds: Loop"></Select>
+            </div>
+
+            {#if loop.selected}
+              <div class="controls-container">
+                {#if loop.count > 0}
+                    <div class="tab" on:click={() => handleStopLoop(loop)}>{Number(loop.count).toFixed(1)}</div>
+                {:else }
+                  {#if loop.isPlaying }
+                    <div class="tab" on:click={() => handleStopLoop(loop)}>Stop Loop</div>
+                  {:else}
+                    <div class="tab" on:click={() => handleStartLoop(loop)}>Start Loop</div>
+                  {/if}
+                {/if}
+                <div class="bpm-container">
+                  <input class="bpm" type="number" name="" value={loop.selected.bpm} placeholder="BPM" on:change={(e) => handleChangeBpm(e, loop)} />
+                  {#if loop.selected.bpm}
+                  <label class="bpm-label">BPM</label>
+                  {/if}
+                </div>
+              </div>
+            {/if}
           </div>
-        {/if}
-      </div>
-    {/each}
-  </section>
+        {/each}
+      </section>
+    </form>
 </section>

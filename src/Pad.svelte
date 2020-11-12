@@ -1,18 +1,31 @@
 <script>
-  import {playSweep, stopSweep} from './sono'
-  import { loadWavetables, loadingLock } from './api.js';
-  import Select from 'svelte-select'
-  import axios from 'axios'
+  // Advanced Pad Settings:
+  // set size of canvas
+  // add multiplier to x,y
+  // add min/max frequency,detune to x,y
+  // switch (detune is x and freqency is y)
+  // change pixel size from 2,2 - x,x
+
+  import {playSweep, stopSweep, applyEffect, 
+    clearEffect, clearImpulse, loadImpulse } from './sono'
+  import api, { loadWavetables, loadingLock, loadImpulses, loadSounds } from './api.js';
+  import SSelect from 'svelte-select'
+  import DEFAULT_EFFECTS from './effects-list'
 
   let selectedWavetable
+  let selectedEffect
+  let selectedImpulse
+  let selectedSound
+
+  let wavetables
+  let impulses
+  let sounds
+  let effects
+
   let wavetableData
-  let items
-  let selectedInteractionType = 'mousemove'
 
-  let interactionTypes = [{title: 'Mouse Move', id: 'mousemove'},
-  {title: 'Mouse Down', id: 'mousedown'}]
-
-  const optionIdentifier = 'id';
+  const idOptionIdentifier = 'id';
+  const optionIdentifier = 'uuid';
   const getOptionLabel = (option) => option.title;
   const getSelectionLabel = (option) => option.title;
 
@@ -79,37 +92,138 @@
   }
 
   const loadOptions = async () => {
-    items = await loadWavetables()
+    effects = DEFAULT_EFFECTS
+    sounds = await loadSounds();
+    wavetables = await loadWavetables()
+    impulses = await loadImpulses();
   }
 
-  const handleSelect = async (event) => {
+  const handleSelectWavetable = async (event) => {
     loadingLock('on')
-    const response = await axios.get(event.detail.file)
+    const response = await api.get(event.detail.file)
     loadingLock('off')
     wavetableData = response.data
   }
+
+  const handleClearWavetable = async (event) => {
+    wavetableData = null
+    selectedWavetable = null  
+  }
+
 
   function handleSelectType(event){
     selectedInteractionType = event.detail.id
   }
 
+  const handleClearEffect = () => {
+    selectedEffect = null
+    clearEffect('pad')
+  }
+
+  const handleSelectEffect = (event) => {
+    selectedEffect = event.detail
+    applyEffect(event.detail.id, 'pad')
+  }
+
+  const handleClearImpulse = () => {
+    selectedImpulse = null
+    clearImpulse('keys')
+  }
+
+  const handleSelectImpulse = async (event) => {
+    selectedImpulse = event.detail
+    loadingLock('on')
+    await loadImpulse(event.detail.file, 'pad')
+    loadingLock('off')
+  }
+
+  const handleSelectSound = (event) => {
+    selectedSound = event.detail
+  }
+
+  const handleClearSound = () => {
+    selectedSound = null
+  }
+
   loadOptions()
 </script>
 
-<div class="select">
-  <Select {items} {optionIdentifier} {getSelectionLabel} {getOptionLabel} bind:selectedWavetable on:select={handleSelect} placeholder="Select Wavetable"></Select>
+<div class="select-container">
+  <div class="select">
+    <SSelect
+      items="{wavetables}"
+      {optionIdentifier}
+      {getSelectionLabel}
+      {getOptionLabel}
+      bind:selectedWavetable
+      on:clear="{handleClearWavetable}"
+      on:select="{handleSelectWavetable}"
+      placeholder="Sounds: Wavetable"
+    ></SSelect>
+  </div>
+  <div class="select">
+    <SSelect
+      items="{sounds}"
+      {optionIdentifier}
+      {getSelectionLabel}
+      {getOptionLabel}
+      bind:selectedSound
+      on:clear="{handleClearSound}"
+      on:select="{handleSelectSound}"
+      placeholder="Sounds: Single-Sound"
+    ></SSelect>
+  </div>
 </div>
 
-<canvas id="pad" width="500" height="250" on:mousedown={handleDown} on:mousemove={handleMove} on:mouseout={stopPlaying} on:mouseup={stopPlaying}></canvas>
-<style>
-    .select {
-      width: 200px;
-      margin: 0 auto;
-      margin-top: 25px;
-      margin-bottom: 25px;
-    }
+<div class="select-container">
+  <div class="select">
+    <SSelect
+      items="{impulses}"
+      {optionIdentifier}
+      {getSelectionLabel}
+      {getOptionLabel}
+      bind:selectedImpulse
+      on:clear="{handleClearImpulse}"
+      on:select="{handleSelectImpulse}"
+      placeholder="Effects: Impulse"
+    ></SSelect>
+  </div>
+  <div class="select">
+    <SSelect
+      items="{effects}"
+      optionIdentifier={idOptionIdentifier}
+      {getSelectionLabel}
+      {getOptionLabel}
+      bind:selectedEffect
+      on:clear="{handleClearEffect}"
+      on:select="{handleSelectEffect}"
+      placeholder="Effects: Tuna Effect"
+    ></SSelect>
+  </div>
+</div>
 
-  canvas{
+<canvas
+  id="pad"
+  width="500"
+  height="250"
+  on:mousedown="{handleDown}"
+  on:mousemove="{handleMove}"
+  on:mouseout="{stopPlaying}"
+  on:mouseup="{stopPlaying}"
+></canvas>
+<style>
+  .select-container {
+    display: flex;
+    width: 430px;
+    margin: 0 auto;
+    margin-bottom: 24px;
+  }
+
+  .select {
+    width: 200px;
+    margin: 0 auto;
+  }
+  canvas {
     border: 1px solid #0f0f0f;
     background: #f3f3f3;
     border-radius: 1px;

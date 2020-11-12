@@ -33,15 +33,15 @@
 					<div class="tab {current === comp ? 'selected' : ''}" on:click={() => setComponent(comp)}>{comp}</div>
 				{/each}
 			</header>
-			<div class="instrument {current === 'Keys' ? 'show' : 'hide'}">
+			<div class="instrument keys {current === 'Keys' ? 'show' : 'hide'}">
 				{#if current === 'Keys'}
 					<Keys />
 				{/if}
 			</div>
-			<div class="instrument {current === 'Loopers' ? 'show' : 'hide'}">
+			<div class="instrument looper {current === 'Loopers' ? 'show' : 'hide'}">
 				<Looper />
 			</div>	
-			<div class="instrument {current === 'Pad' ? 'show' : 'hide'}">
+			<div class="instrument pad {current === 'Pad' ? 'show' : 'hide'}">
 				<Pad />
 			</div>
 		</section>
@@ -78,9 +78,17 @@
 	.block-container {
 		/*border: 1px solid #efefef;*/
 		/*background: #fdfdfd;*/
-		padding: 24px;
-		width: 800px;
+		padding: 12px;
+		width: 70%;
 		margin: 0 auto;
+	}
+
+	.instrument {
+		margin: 0 auto;
+		margin-top: 24px;
+		padding: 24px;
+		border: 1px solid #efefef;
+		background: #fcfcfc;
 	}
 
 	.tab:hover, .tab.selected{

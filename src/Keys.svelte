@@ -1,16 +1,31 @@
 <script>
-  import { playNote, stopNote, loadFile, loadSounds, playSound, stopSound } from "./sono";
+  // Advanced Keys Settings:
+  // Include detune pad
+  // Include numbers and space
+  // Manually adjust frequencies
+  // Add effect to specific key
+  // Change behavior on key hold
+  // Change Effect settings (Impulse and Other Effect) 
+
+  import { playNote, stopNote, loadFile, loadSounds, playSound, stopSound, applyEffect, clearEffect, clearImpulse, loadImpulse } from "./sono";
   import { onDestroy, onMount } from "svelte";
-  import { loadSoundKits, loadingLock } from "./api.js";
+  import { loadSoundKits, loadingLock, loadImpulses, loadFrequencyKits } from "./api.js";
   import Select from "svelte-select";
-  import axios from "axios";
   import { cloneDeep } from "lodash";
   import keysDefault from "./keys-constant";
+  import DEFAULT_EFFECTS from './effects-list'
 
-  let items;
-  let soundKit;
+  let soundKits;
+  let frequencyKits;
+  let impulses;
+  let effects;
+
   let selectedSoundKit;
-  let keys = cloneDeep(keysDefault);
+  let selectedFrequencyKit;
+  let selectedImpulse
+  let selectedEffect;
+
+  let keys = cloneDeep(keysDefault);  
 
   function pressKeyDown(e) {
 
@@ -20,7 +35,7 @@
         if (newSelected) {
           if(selectedSoundKit){
             if(key.uuid){
-              playSound(key.code)
+              playSound(key.code, 'keys')
             } else {
               console.log('No sound assigned to key')
             }
@@ -66,6 +81,7 @@
   onMount(() => {
     window.addEventListener("keydown", pressKeyDown, false);
     window.addEventListener("keyup", pressKeyUp, false);
+    loadOptions();
   })
 
   onDestroy(() => {
@@ -74,16 +90,55 @@
   });
 
   const optionIdentifier = "uuid";
+  const idOptionIdentifier = "id";
   const getOptionLabel = option => option.title;
   const getSelectionLabel = option => option.title;
 
   const loadOptions = async () => {
-    items = await loadSoundKits();
+    effects = DEFAULT_EFFECTS
+    frequencyKits = []
+    soundKits = await loadSoundKits();
+    impulses = await loadImpulses();
   };
 
-  const handleSelect = async (event) => {
+  const handleClearImpulse = () => {
+    selectedImpulse = null
+    clearImpulse('keys')
+  }
+
+  const handleSelectImpulse = async (event) => {
+    selectedImpulse = event.detail
     loadingLock('on')
-    // const response = await axios.get(event.detail.file)
+    await loadImpulse(event.detail.file, 'keys')
+    loadingLock('off')
+  }
+
+  const handleClearEffect = () => {
+    selectedEffect = null
+    clearEffect('keys')
+  }
+
+  const handleSelectEffect = (event) => {
+    selectedEffect = event.detail
+    applyEffect(event.detail.id, 'keys')
+  }
+
+  const handleClearFrequencyKit = () => {
+    keys = cloneDeep(keysDefault);
+    selectedFrequencyKit = null
+  }
+
+  const handleSelectFrequencyKit = (event) => {
+    selectedFrequencyKit = event.detail
+  }
+
+  const handleClearSoundKit = () => {
+    keys = cloneDeep(keysDefault);
+    selectedSoundKit = null
+  }
+
+  const handleSelectSoundKit = async (event) => {
+    loadingLock('on')
     let newKeys
     await loadSounds(event.detail.sound_key_codes)
 
@@ -110,11 +165,6 @@
     loadingLock('off')
   }
 
-  function handleSelectType(event) {
-    selectedInteractionType = event.detail.id;
-  }
-
-  loadOptions();
 </script>
 
 <style>
@@ -131,12 +181,8 @@
     cursor: pointer;
     padding: 10px;
     margin: 0 4px;
+    background: white;
   }
-
-  /*.key:hover, .key.selected{
-    background: #ff3e00;
-    color: white;
-  }*/
 
   .selected {
     background: #ff3e00;
@@ -149,11 +195,16 @@
     margin: 12px 0;
   }
 
+  .select-container {
+    display: flex;
+    width: 430px;
+    margin: 0 auto;
+    margin-bottom: 24px;
+  }
+
   .select {
     width: 200px;
     margin: 0 auto;
-    margin-top: 25px;
-    margin-bottom: 25px;
   }
 
   .disabled {
@@ -162,16 +213,60 @@
 </style>
 
 <section>
-  <div class="select">
-    <Select
-      {items}
-      {optionIdentifier}
-      {getSelectionLabel}
-      {getOptionLabel}
-      bind:selectedSoundKit
-      on:select="{handleSelect}"
-      placeholder="Select SoundKit"
-    ></Select>
+  <div class="select-container">
+    <div class="select">
+      <Select
+        isDisabled={!!selectedFrequencyKit}
+        items={soundKits}
+        optionIdentifier={idOptionIdentifier}
+        {getSelectionLabel}
+        {getOptionLabel}
+        bind:selectedSoundKit
+        on:clear={handleClearSoundKit}
+        on:select="{handleSelectSoundKit}"
+        placeholder="Sounds: Multi-Sound Kit"
+      ></Select>
+    </div>
+    <div class="select">
+      <Select
+        isDisabled={!!selectedSoundKit}
+        items={frequencyKits}
+        optionIdentifier={idOptionIdentifier}
+        {getSelectionLabel}
+        {getOptionLabel}
+        bind:selectedSoundKit
+        on:clear={handleClearFrequencyKit}
+        on:select="{handleSelectFrequencyKit}"
+        placeholder="Sounds: Single-Sound Kit"
+      ></Select>
+    </div>
+  </div>
+
+  <div class="select-container">
+    <div class="select">
+      <Select
+        items={impulses}
+        {optionIdentifier}
+        {getSelectionLabel}
+        {getOptionLabel}
+        bind:selectedImpulse
+        on:clear={handleClearImpulse}
+        on:select="{handleSelectImpulse}"
+        placeholder="Effects: Impulse"
+      ></Select>
+    </div>
+    <div class="select">
+      <Select
+        items={effects}
+        optionIdentifier={idOptionIdentifier}
+        {getSelectionLabel}
+        {getOptionLabel}
+        bind:selectedEffect
+        on:clear={handleClearEffect}
+        on:select="{handleSelectEffect}"
+        placeholder="Effects: Tuna Effect"
+      ></Select>
+    </div>
   </div>
 
   <section class="keys-container">

@@ -38,7 +38,6 @@
   function handleChangeBpm(e, looper){
     const selectedLoop = looper.selected
     const newBpm = Number(e.target.value)
-    console.log(selectedLoop, looper)
 
     const newLooper = {
       ...looper,
@@ -47,7 +46,6 @@
         bpm: newBpm
       }
     }
-    console.log(looper, selectedLoop, loopers, newLooper)
     loopers = loopers.map((l) => l.id === looper.id ? (newLooper): l)
     changeBpm(newLooper, newBpm)
   }
@@ -63,7 +61,6 @@
   };
 
   const handleStartLoop = (loop) => {
-    console.log(loop)
     let countNum = startLoop(loop)    
     if(countNum !== 0){
       const interval = setInterval(() => {

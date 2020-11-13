@@ -39,6 +39,9 @@
             } else {
               console.log('No sound assigned to key')
             }
+          } else if(selectedFrequencyKit){
+            // one day we will implment pitch shift
+            playNote(key.freq, key.note);
           } else {
             playNote(key.freq, key.note);
           }
@@ -53,6 +56,11 @@
   }
 
   function pressKeyUp(e) {
+
+    //TODO: figure out how to fadeout with selected effect and impulse
+    const isFade = true
+    // const isFade = !selectedImpulse && !selectedEffect
+
     keys = keys.map(row =>
       row.map(key => {
         const isKey = key.code === e.keyCode && key.selected
@@ -66,7 +74,7 @@
               console.log('No sound assigned to key')
             }
           } else {
-            stopNote(key.note)
+            stopNote(key.note, isFade)
           }
         }
 
@@ -96,7 +104,7 @@
 
   const loadOptions = async () => {
     effects = DEFAULT_EFFECTS
-    frequencyKits = []
+    frequencyKits = await loadFrequencyKits()
     soundKits = await loadSoundKits();
     impulses = await loadImpulses();
   };
@@ -128,8 +136,28 @@
     selectedFrequencyKit = null
   }
 
-  const handleSelectFrequencyKit = (event) => {
+  const handleSelectFrequencyKit = async (event) => {
     selectedFrequencyKit = event.detail
+    // const soundUrl = selectedFrequencyKit.sound.file
+    // await loadFile(soundUrl, 'freqkit_sound', 'keys')
+
+    keys = keys.map(row =>
+        row.map(key => {
+            const found = event.detail.frequency_key_codes.find((item) => {
+              return Number(item.key_code.code) === key.code
+            })
+
+            if(found){
+              return {
+                ...key,
+                // uuid: selectedFrequencyKit.sound.uuid
+                freq: found.frequency
+              }
+            } else {
+              return key
+            }
+        })
+      )
   }
 
   const handleClearSoundKit = () => {
@@ -151,6 +179,7 @@
             if(found){
               return {
                 ...key,
+                freq: null,
                 uuid: found.sound.uuid
               }
             } else {
@@ -229,7 +258,7 @@
     </div>
     <div class="select">
       <Select
-        isDisabled={!!selectedSoundKit}
+        isDisabled={true}
         items={frequencyKits}
         optionIdentifier={idOptionIdentifier}
         {getSelectionLabel}
@@ -273,7 +302,7 @@
     {#each keys as row}
     <div class="key-row">
       {#each row as key}
-      <div class="key {key.selected ? 'selected' : ''} {selectedSoundKit && !key.uuid ? 'disabled' : ''}" id="{key.code}">{key.note}</div>
+      <div class="key {key.selected ? 'selected' : ''} {!key.freq || (selectedSoundKit && !key.uuid) ? 'disabled' : ''}" id="{key.code}">{key.note}</div>
       {/each}
     </div>
     {/each}

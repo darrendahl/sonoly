@@ -29,10 +29,9 @@ export function loadSoundKits(){
   return api.get('http://localhost:8081/sounds/soundkits/').then((response) => response.data)
 }
 
-export function loadSounds(){
-  return api.get('http://localhost:8081/sounds/soundkits/').then((response) => response.data)
+export function loadSingleSamples(){
+  return api.get('http://localhost:8081/sounds/single_samples/').then((response) => response.data)
 }
-
 
 export function loadImpulses(){
   return api.get('http://localhost:8081/sounds/impulse_responses/').then((response) => response.data)

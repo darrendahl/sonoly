@@ -8,7 +8,7 @@
 
   import {playSweep, stopSweep, applyEffect, 
     clearEffect, clearImpulse, loadImpulse } from './sono'
-  import api, { loadWavetables, loadingLock, loadImpulses, loadSounds } from './api.js';
+  import api, { loadWavetables, loadingLock, loadImpulses, loadSingleSamples } from './api.js';
   import SSelect from 'svelte-select'
   import DEFAULT_EFFECTS from './effects-list'
 
@@ -93,7 +93,7 @@
 
   const loadOptions = async () => {
     effects = DEFAULT_EFFECTS
-    sounds = await loadSounds();
+    sounds = await loadSingleSamples();
     wavetables = await loadWavetables()
     impulses = await loadImpulses();
   }
@@ -167,6 +167,7 @@
       {optionIdentifier}
       {getSelectionLabel}
       {getOptionLabel}
+      isDisabled={true}
       bind:selectedSound
       on:clear="{handleClearSound}"
       on:select="{handleSelectSound}"

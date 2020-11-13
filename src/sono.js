@@ -2,7 +2,10 @@ import api from "./api";
 import axios from "axios";
 import BPM_TIME_KEY from "./bpm-time-key";
 import { getTunaEffect } from "./init-tuna-effects";
-import Tuna from "tunajs";
+import Tuna from "tunajs"
+import smoothfade from 'smoothfade'
+
+
 
 function initSono() {
 	const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -11,9 +14,16 @@ function initSono() {
 	window.tuna = new Tuna(window.audioCtx);
 }
 
-function stopNote(note) {
+function stopNote(note, isFade) {
 	if (sonoStore[`${note}_osc`] && sonoStore[`${note}_osc`].isPlaying) {
-		sonoStore[`${note}_osc`].osc.stop(audioCtx.currentTime);
+
+		if(isFade){
+			const gain = sonoStore[`${note}_osc`].gain
+			const sm = smoothfade(window.audioCtx, gain, {fadeLength: 0.5})
+			sm.fadeOut()
+		} else {
+			sonoStore[`${note}_osc`].osc.stop(audioCtx.currentTime + 0.1);
+		}
 		sonoStore[`${note}_osc`] = null;
 	}
 }
@@ -33,14 +43,15 @@ function playNote(freq, note) {
 	osc.frequency.value = freq;
 
 	if (sonoStore.currentEffect_keys) {
-		const effect = sonoStore.currentEffect_keys;
-		osc.connect(effect);
+		const effect = sonoStore.currentEffect_keys.effect;
+		gain.connect(effect);
 		effect.connect(audioCtx.destination);
 	}
 
 	if (sonoStore.currentImpulse_keys) {
 		const impulseNode = sonoStore.currentImpulse_keys.source;
-		osc.connect(impulseNode);
+		// osc.connect(impulseNode);
+		gain.connect(impulseNode)
 		impulseNode.connect(audioCtx.destination);
 	}
 
@@ -57,11 +68,13 @@ function playNote(freq, note) {
 
 function playSweep({ x, y }, wavetableData) {
 	const wavetable = wavetableData ? wavetableData : null;
-	let osc;
+	let osc, gain;
 	if (!sonoStore.osc) {
 		sonoStore.osc = audioCtx.createOscillator();
+		sonoStore.gain = audioCtx.createGain();
 	}
 	osc = sonoStore.osc;
+	gain = sonoStore.gain;
 
 	if (!sonoStore.wave && wavetable) {
 		sonoStore.wave = audioCtx.createPeriodicWave(
@@ -73,18 +86,28 @@ function playSweep({ x, y }, wavetableData) {
 		);
 		osc.setPeriodicWave(sonoStore.wave);
 	}
+
 	// osc.type = 'sine'
 	osc.frequency.value = x;
 
 	osc.detune.value = 125 - y;
 
 	if (sonoStore.currentEffect_pad) {
-		const effect = sonoStore.currentEffect_pad;
+		const effect = sonoStore.currentEffect_pad.effect;
 		osc.connect(effect);
 		effect.connect(audioCtx.destination);
 	}
 
-	osc.connect(audioCtx.destination);
+	if (sonoStore.currentImpulse_pad) {
+		const impulseNode = sonoStore.currentImpulse_pad.source;
+		osc.connect(impulseNode);
+		impulseNode.connect(audioCtx.destination);
+	}
+
+	osc.connect(gain);
+	gain.connect(audioCtx.destination);
+	gain.gain.value = 0.3;
+
 	if (!sonoStore.isPlaying) {
 		osc.start();
 		sonoStore.isPlaying = true;
@@ -93,10 +116,12 @@ function playSweep({ x, y }, wavetableData) {
 
 function storeFile(buffer, playerId, instr, playbackRate = 1) {
 	const source = audioCtx.createBufferSource();
+	const gain = audioCtx.createGain();
 	source.buffer = buffer;
 	source.playbackRate.value = playbackRate;
 	sonoStore[`${playerId}_${instr}`] = {
 		source: source,
+		gain: gain,
 		isPlaying: false
 	};
 }
@@ -109,27 +134,27 @@ function storeImpulse(buffer, instr) {
 	};
 }
 
-function loadFiles() {}
 
 function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0) {
 	if (!sonoStore[`${playerId}_${instr}`]) return;
 
 	if (sonoStore[`${playerId}_${instr}`].isPlaying) {
 		const newSource = audioCtx.createBufferSource();
+		const newGain = audioCtx.createGain();
 		newSource.buffer = sonoStore[`${playerId}_${instr}`].source.buffer;
 		newSource.playbackRate.value =
 			sonoStore[`${playerId}_${instr}`].source.playbackRate.value;
-		console.log();
 		sonoStore[`${playerId}_${instr}`] = {
 			source: newSource,
-			isPlaying: false
+			isPlaying: false,
+			gain: newGain
 		};
 	}
 
-	const { source, isPlaying } = sonoStore[`${playerId}_${instr}`];
+	const { source, gain, isPlaying } = sonoStore[`${playerId}_${instr}`];
 
 	if (sonoStore.currentEffect_keys && instr === "keys") {
-		const effect = sonoStore.currentEffect_keys;
+		const effect = sonoStore.currentEffect_keys.effect;
 		source.connect(effect);
 		effect.connect(audioCtx.destination);
 	}
@@ -142,6 +167,11 @@ function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0) {
 
 	source.loop = isLoop;
 	source.connect(audioCtx.destination);
+
+	source.connect(gain);
+	gain.connect(audioCtx.destination);
+	gain.gain.value = 0.5;
+
 	source.start(audioCtx.currentTime + timeUntilPlay);
 	sonoStore[`${playerId}_${instr}`].isPlaying = true;
 }
@@ -199,7 +229,6 @@ function changeBpm(looper, newBpm) {
 	const source = getSource(looper.id, "looper");
 	const loop = looper.selected;
 	const newPlaybackRate = newBpm / loop.originalBpm;
-	console.log(newPlaybackRate, newBpm, loop.originalBpm);
 	if (sonoStore.baseLoop && sonoStore.baseLoop.loop.id === loop.id) {
 		sonoStore.baseLoop.loop.selected.bpm = newBpm;
 	}
@@ -275,7 +304,10 @@ function stopSweep() {
 
 function applyEffect(effectId, instr) {
 	const effect = getTunaEffect(effectId);
-	sonoStore[`currentEffect_${instr}`] = effect;
+	sonoStore[`currentEffect_${instr}`] = {
+		effectId: effectId,
+		effect
+	};
 }
 
 function clearEffect(instr) {

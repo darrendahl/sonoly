@@ -15,11 +15,11 @@
   let selectedWavetable
   let selectedEffect
   let selectedImpulse
-  let selectedSound
+  let selectedSingleSample
 
   let wavetables
   let impulses
-  let sounds
+  let singleSamples
   let effects
 
   let wavetableData
@@ -93,7 +93,7 @@
 
   const loadOptions = async () => {
     effects = DEFAULT_EFFECTS
-    sounds = await loadSingleSamples();
+    singleSamples = await loadSingleSamples();
     wavetables = await loadWavetables()
     impulses = await loadImpulses();
   }
@@ -127,7 +127,7 @@
 
   const handleClearImpulse = () => {
     selectedImpulse = null
-    clearImpulse('keys')
+    clearImpulse('pad')
   }
 
   const handleSelectImpulse = async (event) => {
@@ -137,12 +137,15 @@
     loadingLock('off')
   }
 
-  const handleSelectSound = (event) => {
-    selectedSound = event.detail
+  const handleClearSingleSample = () => {
+    selectedSingleSample = null
   }
 
-  const handleClearSound = () => {
-    selectedSound = null
+  const handleSelectSingleSample = async (event) => {
+    selectedSingleSample = event.detail
+    loadingLock('on')
+    await loadFile(selectedSingleSample.file, 'freqkit_sound', 'pad')
+    loadingLock('off')
   }
 
   loadOptions()
@@ -161,19 +164,20 @@
       placeholder="Sounds: Wavetable"
     ></SSelect>
   </div>
+  <!-- 
+  TODO: Single samples
   <div class="select">
     <SSelect
       items="{sounds}"
       {optionIdentifier}
       {getSelectionLabel}
       {getOptionLabel}
-      isDisabled={true}
       bind:selectedSound
       on:clear="{handleClearSound}"
       on:select="{handleSelectSound}"
       placeholder="Sounds: Single-Sound"
     ></SSelect>
-  </div>
+  </div> -->
 </div>
 
 <div class="select-container">

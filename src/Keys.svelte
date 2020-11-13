@@ -9,7 +9,7 @@
 
   import { playNote, stopNote, loadFile, loadSounds, playSound, stopSound, applyEffect, clearEffect, clearImpulse, loadImpulse } from "./sono";
   import { onDestroy, onMount } from "svelte";
-  import { loadSoundKits, loadingLock, loadImpulses, loadFrequencyKits } from "./api.js";
+  import { loadSoundKits, loadingLock, loadImpulses, loadFrequencyKits, loadSingleSamples } from "./api.js";
   import Select from "svelte-select";
   import { cloneDeep } from "lodash";
   import keysDefault from "./keys-constant";
@@ -19,7 +19,9 @@
   let frequencyKits;
   let impulses;
   let effects;
+  let singleSamples
 
+  let selectedSingleSample;
   let selectedSoundKit;
   let selectedFrequencyKit;
   let selectedImpulse
@@ -41,7 +43,13 @@
             }
           } else if(selectedFrequencyKit){
             // one day we will implment pitch shift
-            playNote(key.freq, key.note);
+            if(selectedSingleSample){
+              const playbackRate = Number(key.freq) / Number(selectedSingleSample.base_frequency)
+
+              playSound('freqkit_sound', 'keys', false, 0, playbackRate)
+            } else {
+              playNote(key.freq, key.note);
+            }
           } else {
             playNote(key.freq, key.note);
           }
@@ -57,10 +65,7 @@
 
   function pressKeyUp(e) {
 
-    //TODO: figure out how to fadeout with selected effect and impulse
     const isFade = true
-    // const isFade = !selectedImpulse && !selectedEffect
-
     keys = keys.map(row =>
       row.map(key => {
         const isKey = key.code === e.keyCode && key.selected
@@ -68,7 +73,7 @@
 
         if(isKey){
           if(selectedSoundKit){
-            if(key.uuid){
+            if(selectedSingleSample){
               stopSound(key.code)
             } else {
               console.log('No sound assigned to key')
@@ -105,8 +110,11 @@
   const loadOptions = async () => {
     effects = DEFAULT_EFFECTS
     frequencyKits = await loadFrequencyKits()
+    frequencyKits.push({id: 'default', frequency_key_codes: keysDefault, title: "Default"})
+    frequencyKits = [...frequencyKits]
     soundKits = await loadSoundKits();
     impulses = await loadImpulses();
+    singleSamples = await loadSingleSamples();
   };
 
   const handleClearImpulse = () => {
@@ -131,6 +139,17 @@
     applyEffect(event.detail.id, 'keys')
   }
 
+  const handleClearSingleSample = () => {
+    selectedSingleSample = null
+  }
+
+  const handleSelectSingleSample = async (event) => {
+    selectedSingleSample = event.detail
+    loadingLock('on')
+    await loadFile(selectedSingleSample.file, 'freqkit_sound', 'keys')
+    loadingLock('off')
+  }
+
   const handleClearFrequencyKit = () => {
     keys = cloneDeep(keysDefault);
     selectedFrequencyKit = null
@@ -138,8 +157,10 @@
 
   const handleSelectFrequencyKit = async (event) => {
     selectedFrequencyKit = event.detail
-    // const soundUrl = selectedFrequencyKit.sound.file
-    // await loadFile(soundUrl, 'freqkit_sound', 'keys')
+    if(event.detail.id === 'default'){
+      keys = keysDefault
+      return 
+    }
 
     keys = keys.map(row =>
         row.map(key => {
@@ -150,7 +171,6 @@
             if(found){
               return {
                 ...key,
-                // uuid: selectedFrequencyKit.sound.uuid
                 freq: found.frequency
               }
             } else {
@@ -231,6 +251,10 @@
     margin-bottom: 24px;
   }
 
+  .bigger {
+    width: 650px;
+  }
+
   .select {
     width: 200px;
     margin: 0 auto;
@@ -242,7 +266,7 @@
 </style>
 
 <section>
-  <div class="select-container">
+  <div class="select-container {!!selectedFrequencyKit ? 'bigger': ''}">
     <div class="select">
       <Select
         isDisabled={!!selectedFrequencyKit}
@@ -258,7 +282,7 @@
     </div>
     <div class="select">
       <Select
-        isDisabled={true}
+        isDisabled={!!selectedSoundKit}
         items={frequencyKits}
         optionIdentifier={idOptionIdentifier}
         {getSelectionLabel}
@@ -266,9 +290,23 @@
         bind:selectedSoundKit
         on:clear={handleClearFrequencyKit}
         on:select="{handleSelectFrequencyKit}"
-        placeholder="Sounds: Single-Sound Kit"
+        placeholder="Sounds: Frequency Kit"
       ></Select>
     </div>
+    {#if !!selectedFrequencyKit}
+      <div class="select">
+        <Select
+          items={singleSamples}
+          optionIdentifier={optionIdentifier}
+          {getSelectionLabel}
+          {getOptionLabel}
+          bind:selectedSingleSample
+          on:clear={handleClearSingleSample}
+          on:select="{handleSelectSingleSample}"
+          placeholder="Sounds: Single-Sound"
+        ></Select>
+      </div>
+    {/if}
   </div>
 
   <div class="select-container">
@@ -295,7 +333,7 @@
         on:select="{handleSelectEffect}"
         placeholder="Effects: Tuna Effect"
       ></Select>
-    </div>
+    </div>    
   </div>
 
   <section class="keys-container">

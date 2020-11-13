@@ -114,27 +114,8 @@ function playSweep({ x, y }, wavetableData) {
 	}
 }
 
-		// TODO: FIND BASE FREQUENCY OF buffer
-function getBaseFrequencyFromSource(bufferSource){
-		const analyserNode = audioCtx.createAnalyser()
-		let sampleSize = 1024;
-		const javascriptNode = audioCtx.createScriptProcessor(sampleSize, 1, 1)
-		const bufferLength = analyserNode.frequencyBinCount;
-		analyserNode.fftSize = 256;
-		const dataArray = new Float32Array(bufferLength);
-
-		source.connect(analyserNode);
-		// analyserNode.connect(audioCtx.destination);
-
-		console.log(dataArray)
-	  javascriptNode.onaudioprocess = function () {
-			analyserNode.getFloatFrequencyData(dataArray);
-	 
-	    console.log(dataArray)
-	  }
-
-	  analyserNode.connect(javascriptNode);
-	  // javascriptNode.connect(audioCtx.destination)
+function clearFile(playerId, instr) {
+	sonoStore[`${playerId}_${instr}`] = null
 }
 
 function storeFile(buffer, playerId, instr, playbackRate = 1) {
@@ -159,7 +140,7 @@ function storeImpulse(buffer, instr) {
 }
 
 
-function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0) {
+function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0, playbackRate) {
 	if (!sonoStore[`${playerId}_${instr}`]) return;
 
 	if (sonoStore[`${playerId}_${instr}`].isPlaying) {
@@ -176,6 +157,10 @@ function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0) {
 	}
 
 	const { source, gain, isPlaying } = sonoStore[`${playerId}_${instr}`];
+
+	if(playbackRate){
+		source.playbackRate.value = playbackRate	
+	}
 
 	if (sonoStore.currentEffect_keys && instr === "keys") {
 		const effect = sonoStore.currentEffect_keys.effect;

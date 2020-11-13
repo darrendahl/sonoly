@@ -114,11 +114,35 @@ function playSweep({ x, y }, wavetableData) {
 	}
 }
 
+		// TODO: FIND BASE FREQUENCY OF buffer
+function getBaseFrequencyFromSource(bufferSource){
+		const analyserNode = audioCtx.createAnalyser()
+		let sampleSize = 1024;
+		const javascriptNode = audioCtx.createScriptProcessor(sampleSize, 1, 1)
+		const bufferLength = analyserNode.frequencyBinCount;
+		analyserNode.fftSize = 256;
+		const dataArray = new Float32Array(bufferLength);
+
+		source.connect(analyserNode);
+		// analyserNode.connect(audioCtx.destination);
+
+		console.log(dataArray)
+	  javascriptNode.onaudioprocess = function () {
+			analyserNode.getFloatFrequencyData(dataArray);
+	 
+	    console.log(dataArray)
+	  }
+
+	  analyserNode.connect(javascriptNode);
+	  // javascriptNode.connect(audioCtx.destination)
+}
+
 function storeFile(buffer, playerId, instr, playbackRate = 1) {
 	const source = audioCtx.createBufferSource();
 	const gain = audioCtx.createGain();
 	source.buffer = buffer;
 	source.playbackRate.value = playbackRate;
+
 	sonoStore[`${playerId}_${instr}`] = {
 		source: source,
 		gain: gain,

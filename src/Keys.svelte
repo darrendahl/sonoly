@@ -302,7 +302,7 @@
     {#each keys as row}
     <div class="key-row">
       {#each row as key}
-      <div class="key {key.selected ? 'selected' : ''} {!key.freq || (selectedSoundKit && !key.uuid) ? 'disabled' : ''}" id="{key.code}">{key.note}</div>
+      <div class="key {key.selected ? 'selected' : ''} {(selectedFrequencyKit && !key.freq) || (selectedSoundKit && !key.uuid) ? 'disabled' : ''}" id="{key.code}">{key.note}</div>
       {/each}
     </div>
     {/each}

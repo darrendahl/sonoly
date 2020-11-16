@@ -29,6 +29,7 @@ function serve() {
 
 export default {
 	input: 'src/main.js',
+
 	output: {
 		sourcemap: true,
 		format: 'iife',
@@ -50,10 +51,11 @@ export default {
 		// npm, you'll most likely need these plugins. In
 		// some cases you'll need additional configuration -
 		// consult the documentation for details:
-		// https://github.com/rollup/plugins/tree/master/packages/commonjs
+		// https://github.com/rollup/plugins/tree/master/packages/commonjs		
 		resolve({
 			browser: true,
-			dedupe: ['svelte']
+			dedupe: ['svelte'],
+			extensions: ['.js', '.node']
 		}),
 		commonjs(),
 
@@ -69,6 +71,7 @@ export default {
 		// instead of npm run dev), minify
 		production && terser()
 	],
+	// external: ['websocket'],
 	watch: {
 		clearScreen: false
 	}

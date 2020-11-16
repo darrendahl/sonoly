@@ -4,7 +4,7 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public"
+    "start": "sirv public --single"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^14.0.0",
@@ -20,11 +20,14 @@
   "dependencies": {
     "axios": "^0.21.0",
     "axios-cache-adapter": "^2.5.0",
+    "binaryjs-client": "^1.0.0",
+    "is-empty-array-buffer": "^1.0.0",
     "lodash": "^4.17.20",
     "shortid": "^2.2.16",
     "sirv-cli": "^1.0.0",
     "smoothfade": "^1.1.1",
     "svelte-select": "^3.14.0",
+    "tone": "^14.7.58",
     "tunajs": "^1.0.13"
   }
 }

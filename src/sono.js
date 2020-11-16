@@ -4,14 +4,20 @@ import BPM_TIME_KEY from "./bpm-time-key";
 import { getTunaEffect } from "./init-tuna-effects";
 import Tuna from "tunajs"
 import smoothfade from 'smoothfade'
-
+import { sendData } from './api'
 
 
 function initSono() {
+	const bufferSize = 2048;
 	const AudioContext = window.AudioContext || window.webkitAudioContext;
 	window.audioCtx = new AudioContext();
 	window.sonoStore = {};
 	window.tuna = new Tuna(window.audioCtx);
+	window.globalGain = audioCtx.createGain()
+	window.recorder = audioCtx.createScriptProcessor(bufferSize, 1, 1)
+	recorder.onaudioprocess = recorderProcess
+	globalGain.connect(recorder)
+	recorder.connect(audioCtx.destination)
 }
 
 function stopNote(note, isFade) {
@@ -56,8 +62,10 @@ function playNote(freq, note) {
 	}
 
 	osc.connect(gain);
-	gain.connect(audioCtx.destination);
+	// gain.connect(audioCtx.destination);
 	gain.gain.value = 0.3;
+	gain.connect(globalGain)
+	globalGain.connect(audioCtx.destination);
 
 	if (!isPlaying) {
 		osc.start();
@@ -105,8 +113,9 @@ function playSweep({ x, y }, wavetableData) {
 	}
 
 	osc.connect(gain);
-	gain.connect(audioCtx.destination);
 	gain.gain.value = 0.3;
+	gain.connect(globalGain)
+	globalGain.connect(audioCtx.destination);
 
 	if (!sonoStore.isPlaying) {
 		osc.start();
@@ -139,6 +148,14 @@ function storeImpulse(buffer, instr) {
 	};
 }
 
+
+function recorderProcess (e) {
+  const left = e.inputBuffer.getChannelData(0);
+  if (window.recording === true) {
+    const chunk = left;
+    window.connection.send(chunk);
+  }
+};
 
 function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0, playbackRate) {
 	if (!sonoStore[`${playerId}_${instr}`]) return;
@@ -175,11 +192,15 @@ function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0, playbackR
 	}
 
 	source.loop = isLoop;
-	source.connect(audioCtx.destination);
+	// source.connect(audioCtx.destination);
 
 	source.connect(gain);
-	gain.connect(audioCtx.destination);
+	// gain.connect(audioCtx.destination);
 	gain.gain.value = 0.5;
+
+	gain.connect(globalGain)
+	globalGain.connect(audioCtx.destination)
+	
 
 	source.start(audioCtx.currentTime + timeUntilPlay);
 	sonoStore[`${playerId}_${instr}`].isPlaying = true;

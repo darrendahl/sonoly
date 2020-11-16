@@ -2,11 +2,17 @@
 	import Pad from './Pad.svelte'	
 	import Keys from './Keys.svelte'
 	import Looper from './Looper.svelte'
+	import {onMount} from 'svelte'
 	import { initSono } from './sono'
+	import initWs, { sendMsg, initBinaryJS, closeBinaryJS, listen } from './websocket-api'
 	const components = ['Keys', 'Loopers', 'Pad'];
+	import shortid from 'shortid'
 
-	let current = ''
+	let existingSessions = null
+	let currentInstr = ''
 	let started = false
+	let sessionBroadcasted = false
+	let currentBc = null
 
 	function setComponent(comp){
 		current = comp
@@ -15,8 +21,31 @@
 	function start(){
 		initSono()
 		started = true
-		current = 'Keys'
+		currentInstr = 'Keys'
 	}
+
+	function handleStartBroadcast(){
+		const bcId = shortid.generate()
+		// initWs()
+		// const url = new URL(window.location);
+		window.history.replaceState('', '', bcId)
+		sessionBroadcasted = true
+		currentBc = bcId
+	}
+
+	function handleListenBc(){
+
+	}
+
+	onMount(() => {
+		const bcId = window.location.pathname.split('/').slice(1)[0]
+		console.log(bcId)
+		if(!!bcId && !currentBc){
+			currentBc = bcId
+			start()
+			handleListenBc()
+		}	
+	})
 
 </script>
 
@@ -24,28 +53,43 @@
 	<h1>Sono.ly</h1>
 	{#if !started}
 		<div class="tab start" on:click={start}>
-			Start
+			Start Session
 		</div>
+
+		{#if existingSessions}
+			<div class="tab" on:click={start}>
+				Session id
+			</div>
+		{/if}
 	{:else}
+	
 		<section class="block-container">
 			 <header>
 				{#each components as comp}
-					<div class="tab {current === comp ? 'selected' : ''}" on:click={() => setComponent(comp)}>{comp}</div>
+					<div class="tab {currentInstr === comp ? 'selected' : ''}" on:click={() => setComponent(comp)}>{comp}</div>
 				{/each}
 			</header>
-			<div class="instrument keys {current === 'Keys' ? 'show' : 'hide'}">
-				{#if current === 'Keys'}
+			<div class="instrument keys {currentInstr === 'Keys' ? 'show' : 'hide'}">
+				{#if currentInstr === 'Keys'}
 					<Keys />
 				{/if}
 			</div>
-			<div class="instrument looper {current === 'Loopers' ? 'show' : 'hide'}">
+			<div class="instrument looper {currentInstr === 'Loopers' ? 'show' : 'hide'}">
 				<Looper />
 			</div>	
-			<div class="instrument pad {current === 'Pad' ? 'show' : 'hide'}">
+			<div class="instrument pad {currentInstr === 'Pad' ? 'show' : 'hide'}">
 				<Pad />
 			</div>
 		</section>
+	<section class="broadcast-controls">
+			{#if !currentBc}
+				<div class="tab" on:click={handleStartBroadcast}>
+						Broadcast Session
+				</div>
+			{/if}
+		</section>
 	{/if}
+
 </main>
 
 <style>
@@ -55,8 +99,15 @@
 		max-width: 240px;
 		margin: 0 auto;
 	}
+
+	.broadcast-controls {
+		width: 200px; 
+		margin: 0 auto; 
+		margin-top: 50px;
+	}
+
 	.start {
-		width: 80px; 
+		width: 100px; 
 		margin: 0 auto; 
 		margin-top: -24px; 
 	}

@@ -4,18 +4,17 @@
 	import Looper from './Looper.svelte'
 	import {onMount} from 'svelte'
 	import { initSono } from './sono'
-	import {initBc, listen2Bc } from './broadcaster'
+	import {startBroadcast, listen2Broadcast, initWsConnection, closeBroadcast } from './broadcaster'
 	const components = ['Keys', 'Loopers', 'Pad'];
 	import shortid from 'shortid'
 
 	let existingSessions = null
 	let currentInstr = ''
 	let started = false
-	let sessionBroadcasted = false
 	let currentBc = null
 
 	function setComponent(comp){
-		current = comp
+		currentInstr = comp
 	}
 
 	function start(){
@@ -25,44 +24,44 @@
 	}
 
 	function handleStartBroadcast(){
-		const bcId = shortid.generate()
-		window.history.replaceState('', '', bcId)
-		sessionBroadcasted = true
-		currentBc = bcId
-		initBc()
+		currentBc = shortid.generate()
+		initWsConnection(true)
+		window.history.replaceState('', '', currentBc)
 	}
 
-	function handleListenBc(){
-		listen2Bc()
+	function handleCloseBroadcast(){
+		closeBroadcast()		
+		currentBc = null
+		window.history.replaceState('', '', '')
 	}
 
 	onMount(() => {
 		const bcId = window.location.pathname.split('/').slice(1)[0]
-		console.log(bcId)
 		if(!!bcId && !currentBc){
 			currentBc = bcId
+			initWsConnection(false)
 			start()
-			initBc(false)
-			handleListenBc()
 		}	
 	})
+
+	const gohome = () => {
+		window.location = '/'
+	}
 
 </script>
 
 <main id="main">
-	<h1>Sono.ly</h1>
+	<h1 class="pointer" on:click={gohome}>Sono.ly</h1>
 	{#if !started}
 		<div class="tab start" on:click={start}>
 			Start Session
 		</div>
 
-		{#if existingSessions}
-			<div class="tab" on:click={start}>
-				Session id
-			</div>
-		{/if}
+		<div id="sessions">
+			
+		</div>
 	{:else}
-	
+		
 		<section class="block-container">
 			 <header>
 				{#each components as comp}
@@ -82,6 +81,12 @@
 			</div>
 		</section>
 	<section class="broadcast-controls">
+			{#if currentBc}
+				<span>{currentBc} is playing</span>
+				<div class="tab" on:click={handleCloseBroadcast}>
+						Stop Broadcast
+				</div>
+			{/if}
 			{#if !currentBc}
 				<div class="tab" on:click={handleStartBroadcast}>
 						Broadcast Session
@@ -104,6 +109,10 @@
 		width: 200px; 
 		margin: 0 auto; 
 		margin-top: 50px;
+	}
+
+	#sessions {
+		margin-top: 48px;
 	}
 
 	.start {
@@ -145,6 +154,10 @@
 	.tab:hover, .tab.selected{
 		background: #ff3e00;
 		color: white;
+	}
+
+	.pointer{
+		cursor: pointer;
 	}
 
 	header {

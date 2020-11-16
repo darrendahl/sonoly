@@ -27,10 +27,11 @@
   let selectedImpulse
   let selectedEffect;
 
+  let disable = false
+
   let keys = cloneDeep(keysDefault);  
 
   function pressKeyDown(e) {
-
     keys = keys.map(row =>
       row.map(key => {
         const newSelected = key.selected ? key.selected : key.code === e.keyCode;

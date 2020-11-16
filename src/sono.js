@@ -4,7 +4,6 @@ import BPM_TIME_KEY from "./bpm-time-key";
 import { getTunaEffect } from "./init-tuna-effects";
 import Tuna from "tunajs"
 import smoothfade from 'smoothfade'
-import { recorderBroadcast } from './broadcaster'
 import { sendData } from './api'
 
 
@@ -23,6 +22,20 @@ function initRecorder(){
 	globalGain.connect(recorder)
 	recorder.connect(audioCtx.destination)
 }
+
+function stopRecorder(){
+	window.recorder.onaudioprocess = () => null
+	window.recorder.disconnect(audioCtx.destination)
+}
+
+function recorderBroadcast (e) {
+  const left = e.inputBuffer.getChannelData(0);
+  if (window.recording === true) {
+    const chunk = left;
+    console.log('broadcasting data...')
+    window.connection.send(chunk);
+  }
+};
 
 function stopNote(note, isFade) {
 	if (sonoStore[`${note}_osc`] && sonoStore[`${note}_osc`].isPlaying) {
@@ -366,5 +379,6 @@ export {
 	clearEffect,
 	loadImpulse,
 	clearImpulse,
-	initRecorder
+	initRecorder,
+	stopRecorder
 };

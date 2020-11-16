@@ -4,18 +4,22 @@ import BPM_TIME_KEY from "./bpm-time-key";
 import { getTunaEffect } from "./init-tuna-effects";
 import Tuna from "tunajs"
 import smoothfade from 'smoothfade'
+import { recorderBroadcast } from './broadcaster'
 import { sendData } from './api'
 
 
 function initSono() {
-	const bufferSize = 2048;
 	const AudioContext = window.AudioContext || window.webkitAudioContext;
 	window.audioCtx = new AudioContext();
 	window.sonoStore = {};
 	window.tuna = new Tuna(window.audioCtx);
 	window.globalGain = audioCtx.createGain()
+}
+
+function initRecorder(){
+	const bufferSize = 2048;
 	window.recorder = audioCtx.createScriptProcessor(bufferSize, 1, 1)
-	recorder.onaudioprocess = recorderProcess
+	recorder.onaudioprocess = recorderBroadcast
 	globalGain.connect(recorder)
 	recorder.connect(audioCtx.destination)
 }
@@ -147,15 +151,6 @@ function storeImpulse(buffer, instr) {
 		source: source
 	};
 }
-
-
-function recorderProcess (e) {
-  const left = e.inputBuffer.getChannelData(0);
-  if (window.recording === true) {
-    const chunk = left;
-    window.connection.send(chunk);
-  }
-};
 
 function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0, playbackRate) {
 	if (!sonoStore[`${playerId}_${instr}`]) return;
@@ -370,5 +365,6 @@ export {
 	applyEffect,
 	clearEffect,
 	loadImpulse,
-	clearImpulse
+	clearImpulse,
+	initRecorder
 };

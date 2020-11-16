@@ -4,7 +4,7 @@
 	import Looper from './Looper.svelte'
 	import {onMount} from 'svelte'
 	import { initSono } from './sono'
-	import initWs, { sendMsg, initBinaryJS, closeBinaryJS, listen } from './websocket-api'
+	import {initBc, listen2Bc } from './broadcaster'
 	const components = ['Keys', 'Loopers', 'Pad'];
 	import shortid from 'shortid'
 
@@ -26,15 +26,14 @@
 
 	function handleStartBroadcast(){
 		const bcId = shortid.generate()
-		// initWs()
-		// const url = new URL(window.location);
 		window.history.replaceState('', '', bcId)
 		sessionBroadcasted = true
 		currentBc = bcId
+		initBc()
 	}
 
 	function handleListenBc(){
-
+		listen2Bc()
 	}
 
 	onMount(() => {
@@ -43,6 +42,7 @@
 		if(!!bcId && !currentBc){
 			currentBc = bcId
 			start()
+			initBc(false)
 			handleListenBc()
 		}	
 	})

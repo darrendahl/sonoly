@@ -68,14 +68,16 @@ function playNote(freq, note) {
 	if (sonoStore.currentEffect_keys) {
 		const effect = sonoStore.currentEffect_keys.effect;
 		gain.connect(effect);
-		effect.connect(audioCtx.destination);
+		globalGain.connect(effect)
+		// effect.connect(audioCtx.destination);
 	}
 
 	if (sonoStore.currentImpulse_keys) {
 		const impulseNode = sonoStore.currentImpulse_keys.source;
 		// osc.connect(impulseNode);
 		gain.connect(impulseNode)
-		impulseNode.connect(audioCtx.destination);
+		globalGain.connect(impulseNode)
+		// impulseNode.connect(audioCtx.destination);
 	}
 
 	osc.connect(gain);

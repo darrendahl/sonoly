@@ -28,7 +28,8 @@ let keys = [
     { note: "L", selected: false, code: 76, freq: 880.0 }
   ],
   [
-    { note: "Z", selected: false, code: 90, freq: 1046.5 },
+    { note: "Z", selected: false, code: 90, freq: 659.26 },
+  // { note: "Z", selected: false, code: 90, freq: 1046.5 },
     { note: "X", selected: false, code: 88, freq: 1255.5 },
     { note: "C", selected: false, code: 67, freq: 1760.0 },
     { note: "V", selected: false, code: 86, freq: 1975.5 },

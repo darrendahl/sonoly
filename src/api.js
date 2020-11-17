@@ -1,6 +1,8 @@
 import axios from 'axios'
 import { setup } from 'axios-cache-adapter'
 
+const BASE_URL = process.env === 'dev' ? 'http://localhost:8081' : 'https://sonolib.onrender.com'
+
 export function loadingLock(action){
   if (action === 'on') {
     document.body.style.cursor = 'wait'
@@ -13,7 +15,7 @@ export function loadingLock(action){
 
 const api = setup({
   // `axios` options
-  // baseURL: 'http://some-rest.api',
+  baseURL: BASE_URL,
 
   // `axios-cache-adapter` options
   cache: {
@@ -22,27 +24,27 @@ const api = setup({
 })
 
 export function loadWavetables(){
-  return api.get('http://localhost:8081/sounds/wavetables/').then((response) => response.data)
+  return api.get('/sounds/wavetables/').then((response) => response.data)
 }
 
 export function loadSoundKits(){
-  return api.get('http://localhost:8081/sounds/soundkits/').then((response) => response.data)
+  return api.get('/sounds/soundkits/').then((response) => response.data)
 }
 
 export function loadSingleSamples(){
-  return api.get('http://localhost:8081/sounds/single_samples/').then((response) => response.data)
+  return api.get('/sounds/single_samples/').then((response) => response.data)
 }
 
 export function loadImpulses(){
-  return api.get('http://localhost:8081/sounds/impulse_responses/').then((response) => response.data)
+  return api.get('/sounds/impulse_responses/').then((response) => response.data)
 }
 
 export function loadFrequencyKits(){
-  return api.get('http://localhost:8081/sounds/frequencykits/').then((response) => response.data)
+  return api.get('/sounds/frequencykits/').then((response) => response.data)
 }
 
 export function loadLoops(){
-  return api.get('http://localhost:8081/sounds/loops/').then((response) => response.data)
+  return api.get('/sounds/loops/').then((response) => response.data)
 }
 
 

@@ -4,9 +4,11 @@ let init = false;
 let audioCache = [];
 const soundController = {};
 
+const WS_BASE_URL = process.env === 'dev' ? 'ws://127.0.0.1:3001' : 'ws://sonoly-node:10000'
+
 export function initWsConnection(isBroadcaster) {
   window.WebSocket = window.WebSocket || window.MozWebSocket;
-  window.connection = new WebSocket("ws://127.0.0.1:3001/broadcast");
+  window.connection = new WebSocket("/broadcast");
   window.connection.binaryType = "arraybuffer";
 
   connection.onopen = function() {
@@ -30,6 +32,7 @@ export function startBroadcast(recording = true) {
 
   connection.onerror = function(error) {
     // an error occurred when sending/receiving data
+    console.error(error)
   };
 }
 

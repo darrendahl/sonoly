@@ -82,14 +82,14 @@
 		</section>
 	<section class="broadcast-controls">
 			{#if currentBc}
-				<span>{currentBc} is playing</span>
+				<span>https://sono.ly/{currentBc} is your livestream url</span>
 				<div class="tab" on:click={handleCloseBroadcast}>
-						Stop Broadcast
+						Stop Livestream
 				</div>
 			{/if}
 			{#if !currentBc}
 				<div class="tab" on:click={handleStartBroadcast}>
-						Broadcast Session
+						Livestream Session
 				</div>
 			{/if}
 		</section>

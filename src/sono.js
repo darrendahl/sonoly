@@ -131,12 +131,18 @@ function playSweep({ x, y }, wavetableData) {
 
 	if (sonoStore.currentEffect_pad) {
 		const effect = sonoStore.currentEffect_pad.effect;
+		if(window.merger){
+			effect.connect(merger, 0, 2)
+		}
 		osc.connect(effect);
 		effect.connect(audioCtx.destination);
 	}
 
 	if (sonoStore.currentImpulse_pad) {
 		const impulseNode = sonoStore.currentImpulse_pad.source;
+		if(window.merger){
+			impulseNode.connect(merger, 0, 3)
+		}
 		osc.connect(impulseNode);
 		impulseNode.connect(audioCtx.destination);
 	}
@@ -201,12 +207,18 @@ function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0, playbackR
 
 	if (sonoStore.currentEffect_keys && instr === "keys") {
 		const effect = sonoStore.currentEffect_keys.effect;
+		if(window.merger){
+			effect.connect(merger, 0, 4)
+		}
 		source.connect(effect);
 		effect.connect(audioCtx.destination);
 	}
 
 	if (sonoStore.currentImpulse_keys && instr === "keys") {
 		const impulseNode = sonoStore.currentImpulse_keys.source;
+		if(window.merger){
+			impulseNode.connect(merger, 0, 5)
+		}
 		source.connect(impulseNode);
 		impulseNode.connect(audioCtx.destination);
 	}

@@ -8,7 +8,7 @@ const WS_BASE_URL = process.env === 'dev' ? 'ws://127.0.0.1:3001' : 'ws://sonoly
 
 export function initWsConnection(isBroadcaster) {
   window.WebSocket = window.WebSocket || window.MozWebSocket;
-  window.connection = new WebSocket("/broadcast");
+  window.connection = new WebSocket(`${WS_BASE_URL}/broadcast`);
   window.connection.binaryType = "arraybuffer";
 
   connection.onopen = function() {
@@ -85,9 +85,13 @@ export function listen2Broadcast() {
 }
 
 window.onbeforeunload = function() {
-  stopRecorder();
-  window.connection.onclose = function() {}; // disable onclose handler first
-  window.connection.close();
+  if(window.recording){
+    stopRecorder();
+  }
+  if(window.connection){
+    window.connection.onclose = function() {}; // disable onclose handler first
+    window.connection.close();
+  }
 };
 
 export function closeBroadcast() {

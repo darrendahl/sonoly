@@ -18,8 +18,10 @@ function initSono() {
 function initRecorder(){
 	const bufferSize = 2048;
 	window.recorder = audioCtx.createScriptProcessor(bufferSize, 1, 1)
+	window.merger = audioCtx.createChannelMerger()
 	recorder.onaudioprocess = recorderBroadcast
 	globalGain.connect(recorder)
+	merger.connect(recorder)
 	recorder.connect(audioCtx.destination)
 }
 
@@ -65,25 +67,33 @@ function playNote(freq, note) {
 	isPlaying = sonoStore[`${note}_osc`].isPlaying;
 	osc.frequency.value = freq;
 
+	osc.connect(gain);
+	// gain.connect(audioCtx.destination);
+	gain.gain.value = 0.3;
+	gain.connect(globalGain)
+	
+
 	if (sonoStore.currentEffect_keys) {
 		const effect = sonoStore.currentEffect_keys.effect;
-		gain.connect(effect);
+		// gain.connect(effect);
 		globalGain.connect(effect)
+		if(window.merger){
+			effect.connect(merger, 0, 0)
+		}
 		effect.connect(audioCtx.destination);
 	}
 
 	if (sonoStore.currentImpulse_keys) {
 		const impulseNode = sonoStore.currentImpulse_keys.source;
 		// osc.connect(impulseNode);
-		gain.connect(impulseNode)
+		// gain.connect(impulseNode)
 		globalGain.connect(impulseNode)
+		if(window.merger){
+			impulseNode.connect(merger, 0, 1)
+		}
 		impulseNode.connect(audioCtx.destination);
 	}
 
-	osc.connect(gain);
-	// gain.connect(audioCtx.destination);
-	gain.gain.value = 0.3;
-	gain.connect(globalGain)
 	globalGain.connect(audioCtx.destination);
 
 	if (!isPlaying) {

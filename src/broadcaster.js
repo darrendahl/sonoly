@@ -4,7 +4,7 @@ let init = false;
 let audioCache = [];
 const soundController = {};
 
-const WS_BASE_URL = process.env === 'dev' ? 'ws://127.0.0.1:3001' : 'ws://sonoly-node:10000'
+const WS_BASE_URL = process.env === 'dev' ? 'ws://127.0.0.1:3001' : 'wss://sonoly-node:10000'
 
 export function initWsConnection(isBroadcaster) {
   window.WebSocket = window.WebSocket || window.MozWebSocket;

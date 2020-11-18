@@ -1,105 +1,53 @@
-*Looking for a shareable component template? Go here --> [sveltejs/component-template](https://github.com/sveltejs/component-template)*
+### https://sono.ly is a collection of instruments you can play with your keyboard and mouse and livestream to anyone.
 
----
+### To get started locally
 
-# svelte app
-
-This is a project template for [Svelte](https://svelte.dev) apps. It lives at https://github.com/sveltejs/template.
-
-To create a new project based on this template using [degit](https://github.com/Rich-Harris/degit):
-
-```bash
-npx degit sveltejs/template svelte-app
-cd svelte-app
 ```
-
-*Note that you will need to have [Node.js](https://nodejs.org) installed.*
-
-
-## Get started
-
-Install the dependencies...
-
-```bash
-cd svelte-app
+git clone https://github.com/bluedahltech/sono.ly/
+cd sono.ly
 npm install
-```
-
-...then start [Rollup](https://rollupjs.org):
-
-```bash
 npm run dev
 ```
 
-Navigate to [localhost:5000](http://localhost:5000). You should see your app running. Edit a component file in `src`, save it, and reload the page to see your changes.
 
-By default, the server will only respond to requests from localhost. To allow connections from other computers, edit the `sirv` commands in package.json to include the option `--host 0.0.0.0`.
+----------
 
-If you're using [Visual Studio Code](https://code.visualstudio.com/) we recommend installing the official extension [Svelte for VS Code](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode). If you are using other editors you may need to install a plugin in order to get syntax highlighting and intellisense.
+### How to use
 
-## Building and running in production mode
+First, you select your instrument, then you can select your sounds and effects. Depending on the instrument, these can be single sounds, multi sound kits, frequency kits, wavetables, loops, impulse responses, synths, and effects. Then, you play the instrument using your keyboard and mouse. If you wish, you can livestream your session to anyone who wants to join and listen.
 
-To create an optimised version of the app:
+Sono.ly has 3 instruments by default: Keys, Loopers, and Pad. 
 
-```bash
-npm run build
-```
+----------
 
-You can run the newly built app with `npm run start`. This uses [sirv](https://github.com/lukeed/sirv), which is included in your package.json's `dependencies` so that the app will work when you deploy to platforms like [Heroku](https://heroku.com).
+### Important distinctions from sono.ly and other music making applications.
 
+1. There is no recording natively in the app. This is not a DAW, or Digital Audio Workstation, like GarageBand and others. We are not composing professional grade music using sono.ly. Sono.ly is about jamming, experimenting, discovering, and playing live in the moment. Livestreaming allows others to sit in on your sessions. That being said, no one is stopping you from recording a screen capture video of your sono.ly sessions using Soundflower, Kap or some other software.
 
-## Single-page app mode
+2. Because there is no recording, we won’t have any timelines or waveforms in the app. Again, sono.ly is not a DAW. We are building instruments that can be played with your keyboard and mouse, and then livestream to anyone. We are not building software to compose beats and songs. 
 
-By default, sirv will only respond to requests that match files in `public`. This is to maximise compatibility with static fileservers, allowing you to deploy your app anywhere.
+----------
 
-If you're building a single-page app (SPA) with multiple routes, sirv needs to be able to respond to requests for *any* path. You can make it so by editing the `"start"` command in package.json:
+### Architecture 
 
-```js
-"start": "sirv public --single"
-```
+There is a backend Django application and a Node.js middle layer application in separate repos and a frontend Svelte application in this repo. In order to get the entire application working you will have to clone all three, but you can use default sounds and mock responses available in this repo and have the app working without the backend. 
 
-## Using TypeScript
+  - The Backend https://github.com/bluedahltech/sonolib/ is for managing the sound library and data models that the frontend instruments consume, hosted at https://sonolib.onrender.com
 
-This template comes with a script to set up a TypeScript development environment, you can run it immediately after cloning the template with:
+  - The Frontend https://github.com/bluedahltech/sono.ly/ is the interface where you play the instruments
 
-```bash
-node scripts/setupTypeScript.js
-```
+  - The Middle Nodejs layer https://github.com/bluedahltech/sonoly-node/ handles the live stream
 
-Or remove the script via:
+Each instrument has the capability to apply sounds and effects. Some sounds and effects are done fully in JavaScript using Tunajs, Tonejs and the web audio api. Otherwise, we pull single samples, loops, multi sound kits, impulse responses, and wavetables from the backend library application. 
 
-```bash
-rm scripts/setupTypeScript.js
-```
+Certain instruments depend on particular backend data models. If you wish to create a new instrument, it may require a new data model on the backend application to supercharge your instrument.
 
-## Deploying to the web
+Sono.js contains all of our web audio api based code. Right now, it’s a bunch of utility functions with a global store.
 
-### With [Vercel](https://vercel.com)
+See the frequency to note chart and the bpm and bars to seconds chart to understand some of the numerology behind the app.
 
-Install `vercel` if you haven't already:
+Of course, this is an open source project. See the issues page for an initial todo list. We welcome ideas, pull requests, and issues. If you wish to contribute to the project, clone the repo, view the issues, and don’t hesitate to reach out if you have any questions. :)
 
-```bash
-npm install -g vercel
-```
-
-Then, from within your project folder:
-
-```bash
-cd public
-vercel deploy --name my-project
-```
-
-### With [surge](https://surge.sh/)
-
-Install `surge` if you haven't already:
-
-```bash
-npm install -g surge
-```
-
-Then, from within your project folder:
-
-```bash
-npm run build
-surge public my-project.surge.sh
-```
+Special thanks to:
+Tunajs
+Tonejs

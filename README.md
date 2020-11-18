@@ -36,17 +36,11 @@ That being said, no one is stopping you from recording a screen capture video of
 
 There is a backend Django application and a Node.js middle layer application in separate repos and a frontend Svelte application in this repo. In order to get the entire application working you will have to clone all three, but you can use default sounds and mock responses available in this repo and have the app working without the backend. 
 
-  The Backend https://github.com/darrendahl/sonolib/ is for managing the sound library and data models that the frontend instruments consume
+  - The Backend https://github.com/darrendahl/sonolib/ is for managing the sound library and data models that the frontend instruments consume
 
-  The Frontend https://github.com/darrendahl/sono.ly/ is the interface where you play the instruments
+  - The Frontend https://github.com/darrendahl/sono.ly/ is the interface where you play the instruments
 
-  The Middle Nodejs layer https://github.com/darrendahl/sonoly-node/ handles the live stream
-
-Svelte components
-  App
-  Keys
-  Loopers
-  Pad
+  - The Middle Nodejs layer https://github.com/darrendahl/sonoly-node/ handles the live stream
 
 Each instrument has the capability to apply sounds and effects. Some sounds and effects are done fully in JavaScript using Tunajs, Tonejs and the web audio api. Otherwise, we pull single samples, loops, multi sound kits, impulse responses, and wavetables from the backend library application. 
 

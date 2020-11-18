@@ -1,6 +1,4 @@
-# Web based sound making
-
-https://sono.ly is a collection of instruments you can play with your keyboard and mouse and livestream to anyone.
+### https://sono.ly is a collection of instruments you can play with your keyboard and mouse and livestream to anyone.
 
 ### To get started locally
 

@@ -95,6 +95,10 @@ window.onbeforeunload = function() {
 };
 
 export function closeBroadcast() {
-  window.connection.close();
-  stopRecorder();
+  if(window.connection){
+    window.connection.close();
+  }
+  if(window.recording){
+    stopRecorder();
+  }
 }

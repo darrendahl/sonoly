@@ -12,6 +12,7 @@
 	let currentInstr = ''
 	let started = false
 	let currentBc = null
+	let isListener = false
 
 	function setComponent(comp){
 		currentInstr = comp
@@ -24,7 +25,9 @@
 	}
 
 	function handleStartBroadcast(){
-		currentBc = shortid.generate()
+		// TODO: Implement multiple sessions
+		// currentBc = shortid.generate()
+		currentBc = 'livestream'
 		initWsConnection(true)
 		window.history.replaceState('', '', currentBc)
 	}
@@ -33,14 +36,20 @@
 		closeBroadcast()		
 		currentBc = null
 		window.history.replaceState('', '', '')
+		isListener = false
+	}
+
+	function startListening(){
+		initWsConnection(false)
+		start()
+		started = true
 	}
 
 	onMount(() => {
 		const bcId = window.location.pathname.split('/').slice(1)[0]
 		if(!!bcId && !currentBc){
+			isListener = true
 			currentBc = bcId
-			initWsConnection(false)
-			start()
 		}	
 	})
 
@@ -52,7 +61,7 @@
 
 <main id="main">
 	<h1 class="pointer" on:click={gohome}>Sono.ly</h1>
-	{#if !started}
+	{#if !started && !isListener}
 		<div class="tab start" on:click={start}>
 			Start Session
 		</div>
@@ -60,9 +69,17 @@
 		<div id="sessions">
 			
 		</div>
+	{:else if !started && isListener}
+		<div class="tab start" on:click={startListening}>
+			Start Listening
+		</div>
 	{:else}
 		
-		<section class="block-container">
+		<section class="block-container {isListener ? 'listener' : null}">
+
+				{#if isListener}
+					<div class="listen-header">Listening to Darren's Livestream...</div>
+				{/if}
 			 <header>
 				{#each components as comp}
 					<div class="tab {currentInstr === comp ? 'selected' : ''}" on:click={() => setComponent(comp)}>{comp}</div>
@@ -81,15 +98,22 @@
 			</div>
 		</section>
 	<section class="broadcast-controls">
-			{#if currentBc}
-				<span>https://sono.ly/{currentBc} is your livestream url</span>
+			{#if currentBc && !isListener}
+				<div style="margin-bottom: 12px;">Livestreaming to https://sono.ly/{currentBc}</div>
 				<div class="tab" on:click={handleCloseBroadcast}>
 						Stop Livestream
 				</div>
 			{/if}
+
+			{#if currentBc && isListener}
+				<div class="tab" on:click={handleCloseBroadcast}>
+						Stop Listening
+				</div>
+			{/if}
+
 			{#if !currentBc}
 				<div class="tab" on:click={handleStartBroadcast}>
-						Livestream Session
+						Start Livestreaming
 				</div>
 			{/if}
 		</section>
@@ -105,6 +129,14 @@
 		margin: 0 auto;
 	}
 
+	.listen-header {
+		margin-bottom: 24px;
+	}
+
+	.listener {
+		opacity: 0.7;
+	}
+
 	.broadcast-controls {
 		width: 200px; 
 		margin: 0 auto; 
@@ -116,7 +148,7 @@
 	}
 
 	.start {
-		width: 100px; 
+		width: 150px; 
 		margin: 0 auto; 
 		margin-top: -24px; 
 	}

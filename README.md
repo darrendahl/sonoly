@@ -1,4 +1,4 @@
-Web based sound making
+# Web based sound making
 
 First, you select your instrument, then you can select your sounds and effects. Depending on the instrument, these can be single sounds, multi sound kits, frequency kits, wavetables, loops, impulse responses, synths, and effects. Then, you play the instrument using your keyboard and mouse. If you wish, you can livestream your session to anyone who wants to join and listen.
 
@@ -16,15 +16,19 @@ That being said, no one is stopping you from recording a screen capture video of
 
 —————————
 
-To get started locally
+### To get started locally
 
-Clone repo
+```
+git clone https://github.com/darrendahl/sono.ly/
+cd sono.ly
 npm install
 npm run dev
+```
+
 
 —————————
 
-Architecture 
+### Architecture 
 
 There is a backend Django application and a Node.js middle layer application in separate repos and a frontend Svelte application in this repo. In order to get the entire application working you will have to clone all three, but you can use default sounds and mock responses available in this repo and have the app working without the backend. 
 

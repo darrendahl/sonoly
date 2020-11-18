@@ -12,7 +12,7 @@ npm run dev
 ```
 
 
-—————————
+----------
 
 ### How to use
 
@@ -20,7 +20,7 @@ First, you select your instrument, then you can select your sounds and effects. 
 
 Sono.ly has 3 instruments by default: Keys, Loopers, and Pad. 
 
-—————————-
+----------
 
 ### Important distinctions from sono.ly and other music making applications.
 

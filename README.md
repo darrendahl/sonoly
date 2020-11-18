@@ -1,4 +1,4 @@
-`Web based sound making`
+Web based sound making
 
 First, you select your instrument, then you can select your sounds and effects. Depending on the instrument, these can be single sounds, multi sound kits, frequency kits, wavetables, loops, impulse responses, synths, and effects. Then, you play the instrument using your keyboard and mouse. If you wish, you can livestream your session to anyone who wants to join and listen.
 

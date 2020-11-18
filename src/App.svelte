@@ -117,6 +117,9 @@
 				</div>
 			{/if}
 		</section>
+		<footer>
+			<a href="https://sonolib.onrender.com" target="_blank">View Sound Library</a>
+		</footer>
 	{/if}
 
 </main>
@@ -141,6 +144,7 @@
 		width: 200px; 
 		margin: 0 auto; 
 		margin-top: 50px;
+		margin-bottom: 12px;
 	}
 
 	#sessions {

@@ -376,7 +376,7 @@ function applyImpulse(effectId, instr) {
 }
 
 function clearImpulse(instr) {
-	if(sonoStore[`currentEffect_${instr}`]){
+	if(sonoStore[`currentImpulse_${instr}`]){
 		sonoStore[`currentImpulse_${instr}`].source.disconnect(audioCtx.destination)
 		sonoStore[`currentImpulse_${instr}`] = null;
 	}

@@ -266,7 +266,7 @@
 </style>
 
 <section>
-  <div class="select-container {!!selectedFrequencyKit ? 'bigger': ''}">
+  <div class="select-container bigger'}">
     <div class="select">
       <Select
         isDisabled={!!selectedFrequencyKit}
@@ -293,20 +293,19 @@
         placeholder="Sounds: Frequency Kit"
       ></Select>
     </div>
-    {#if !!selectedFrequencyKit}
-      <div class="select">
-        <Select
-          items={singleSamples}
-          optionIdentifier={optionIdentifier}
-          {getSelectionLabel}
-          {getOptionLabel}
-          bind:selectedSingleSample
-          on:clear={handleClearSingleSample}
-          on:select="{handleSelectSingleSample}"
-          placeholder="Sounds: Single-Sound"
-        ></Select>
-      </div>
-    {/if}
+    <div class="select">
+      <Select
+        isDisabled={!!selectedSoundKit}
+        items={singleSamples}
+        optionIdentifier={optionIdentifier}
+        {getSelectionLabel}
+        {getOptionLabel}
+        bind:selectedSingleSample
+        on:clear={handleClearSingleSample}
+        on:select="{handleSelectSingleSample}"
+        placeholder="Sounds: Single-Sound"
+      ></Select>
+    </div>
   </div>
 
   <div class="select-container">

@@ -28,7 +28,6 @@
   let selectedEffect;
 
   let disable = false
-
   let keys = cloneDeep(keysDefault);  
 
   function pressKeyDown(e) {

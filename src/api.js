@@ -1,11 +1,11 @@
 import axios from "axios";
 import { setup } from "axios-cache-adapter";
 
-const BASE_URL =
-  process.env.REMOTE_LIB_API ||
-  (process.env.NODE_ENV === "dev"
-    ? "http://localhost:8081"
-    : "https://sonolib.onrender.com");
+const BASE_URL = "https://sonolib.onrender.com";
+
+// if developing locally, still can use public api
+// but if have sonolib up running and want to connect
+// const BASE_URL = "http://localhost:8081"
 
 export function loadingLock(action) {
   if (action === "on") {

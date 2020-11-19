@@ -4,6 +4,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import replace from '@rollup/plugin-replace';
+import injectEnv from 'rollup-plugin-inject-env';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -48,9 +49,9 @@ export default {
 			}
 		}),
 
-		replace({
-	     'process.env': production ? '"production"' : '"dev"',
-	   }),
+		injectEnv({
+      envFilePath: "./.env",
+    }),
 
 		// If you have external dependencies installed from
 		// npm, you'll most likely need these plugins. In

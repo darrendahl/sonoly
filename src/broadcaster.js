@@ -4,7 +4,11 @@ let init = false;
 let audioCache = [];
 const soundController = {};
 
-const WS_BASE_URL = process.env === 'dev' ? 'ws://127.0.0.1:3001' : 'wss://sonoly-node.onrender.com'
+const WS_BASE_URL =
+  process.env.REMOTE_WS_API ||
+  (process.env.NODE_ENV === "dev"
+    ? "ws://127.0.0.1:3001"
+    : 'wss://sonoly-node.onrender.com');
 
 export function initWsConnection(isBroadcaster) {
   window.WebSocket = window.WebSocket || window.MozWebSocket;
@@ -32,7 +36,7 @@ export function startBroadcast(recording = true) {
 
   connection.onerror = function(error) {
     // an error occurred when sending/receiving data
-    console.error(error)
+    console.error(error);
   };
 }
 
@@ -85,20 +89,20 @@ export function listen2Broadcast() {
 }
 
 window.onbeforeunload = function() {
-  if(window.recording){
+  if (window.recording) {
     stopRecorder();
   }
-  if(window.connection){
+  if (window.connection) {
     window.connection.onclose = function() {}; // disable onclose handler first
     window.connection.close();
   }
 };
 
 export function closeBroadcast() {
-  if(window.connection){
+  if (window.connection) {
     window.connection.close();
   }
-  if(window.recording){
+  if (window.recording) {
     stopRecorder();
   }
 }

@@ -68,15 +68,13 @@ function playNote(freq, note) {
 	osc.frequency.value = freq;
 
 	osc.connect(gain);
-	// gain.connect(audioCtx.destination);
+	gain.connect(audioCtx.destination);
 	gain.gain.value = 0.3;
-	gain.connect(globalGain)
 	
 
 	if (sonoStore.currentEffect_keys) {
 		const effect = sonoStore.currentEffect_keys.effect;
-		// gain.connect(effect);
-		globalGain.connect(effect)
+		gain.connect(effect);
 		if(window.merger){
 			effect.connect(merger, 0, 0)
 		}
@@ -86,15 +84,12 @@ function playNote(freq, note) {
 	if (sonoStore.currentImpulse_keys) {
 		const impulseNode = sonoStore.currentImpulse_keys.source;
 		// osc.connect(impulseNode);
-		// gain.connect(impulseNode)
-		globalGain.connect(impulseNode)
+		gain.connect(impulseNode)
 		if(window.merger){
 			impulseNode.connect(merger, 0, 1)
 		}
 		impulseNode.connect(audioCtx.destination);
 	}
-
-	globalGain.connect(audioCtx.destination);
 
 	if (!isPlaying) {
 		osc.start();
@@ -224,14 +219,10 @@ function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0, playbackR
 	}
 
 	source.loop = isLoop;
-	// source.connect(audioCtx.destination);
 
 	source.connect(gain);
-	// gain.connect(audioCtx.destination);
+	gain.connect(audioCtx.destination);
 	gain.gain.value = 0.5;
-
-	gain.connect(globalGain)
-	globalGain.connect(audioCtx.destination)
 	
 
 	source.start(audioCtx.currentTime + timeUntilPlay);
@@ -373,7 +364,10 @@ function applyEffect(effectId, instr) {
 }
 
 function clearEffect(instr) {
-	sonoStore[`currentEffect_${instr}`] = null;
+	if(sonoStore[`currentEffect_${instr}`]){
+		sonoStore[`currentEffect_${instr}`].effect.disconnect(audioCtx.destination)
+		sonoStore[`currentEffect_${instr}`] = null;
+	}
 }
 
 function applyImpulse(effectId, instr) {
@@ -382,7 +376,10 @@ function applyImpulse(effectId, instr) {
 }
 
 function clearImpulse(instr) {
-	sonoStore[`currentImpulse_${instr}`] = null;
+	if(sonoStore[`currentEffect_${instr}`]){
+		sonoStore[`currentImpulse_${instr}`].source.disconnect(audioCtx.destination)
+		sonoStore[`currentImpulse_${instr}`] = null;
+	}
 }
 
 export {

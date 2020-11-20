@@ -266,7 +266,7 @@
 </style>
 
 <section>
-  <div class="select-container bigger'}">
+  <div class="select-container bigger">
     <div class="select">
       <Select
         isDisabled={!!selectedFrequencyKit}

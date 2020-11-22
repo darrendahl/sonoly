@@ -86,9 +86,7 @@
 				{/each}
 			</header>
 			<div class="instrument keys {currentInstr === 'Keys' ? 'show' : 'hide'}">
-				{#if currentInstr === 'Keys'}
-					<Keys />
-				{/if}
+					<Keys currentInstr={currentInstr} />
 			</div>
 			<div class="instrument looper {currentInstr === 'Loopers' ? 'show' : 'hide'}">
 				<Looper />

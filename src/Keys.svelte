@@ -15,6 +15,8 @@
   import keysDefault from "./keys-constant";
   import DEFAULT_EFFECTS from './effects-list'
 
+  export let currentInstr;
+
   let soundKits;
   let frequencyKits;
   let impulses;
@@ -91,16 +93,22 @@
     );
   }
 
-  onMount(() => {
+  $: if(currentInstr === 'Keys'){
     window.addEventListener("keydown", pressKeyDown, false);
     window.addEventListener("keyup", pressKeyUp, false);
+  } else {
+    window.removeEventListener("keydown", pressKeyDown, false);
+    window.removeEventListener("keyup", pressKeyUp, false);
+  }
+
+  onMount(() => {
     loadOptions();
   })
 
-  onDestroy(() => {
-    window.removeEventListener("keydown", pressKeyDown, false);
-    window.removeEventListener("keyup", pressKeyUp, false);
+  onDestroy(() => {  
+
   });
+    
 
   const optionIdentifier = "uuid";
   const idOptionIdentifier = "id";

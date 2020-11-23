@@ -43,17 +43,13 @@
             } else {
               console.log('No sound assigned to key')
             }
-          } else if(selectedFrequencyKit){
-            // one day we will implment pitch shift
+          } else {
             if(selectedSingleSample){
               const playbackRate = Number(key.freq) / Number(selectedSingleSample.base_frequency)
-
               playSound('freqkit_sound', 'keys', false, 0, playbackRate)
             } else {
               playNote(key.freq, key.note);
             }
-          } else {
-            playNote(key.freq, key.note);
           }
         }
 

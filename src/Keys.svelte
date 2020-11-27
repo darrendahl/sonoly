@@ -7,7 +7,7 @@
   // Change behavior on key hold
   // Change Effect settings (Impulse and Other Effect) 
 
-  import { playNote, stopNote, loadFile, loadSounds, playSound, stopSound, applyEffect, clearEffect, clearImpulse, loadImpulse } from "./sono";
+  import { playNote, stopNote, loadFile, loadSounds, playSound, stopSound, applyEffect, clearEffect, clearImpulse, loadImpulse, loadSynth, playSynth, clearSynth, stopSynth } from "./sono";
   import { onDestroy, onMount } from "svelte";
   import { loadSoundKits, loadingLock, loadImpulses, loadFrequencyKits, loadSingleSamples } from "./api.js";
   import Select from "svelte-select";
@@ -22,12 +22,23 @@
   let impulses;
   let effects;
   let singleSamples
+  let synths = [
+    {title: 'Synth', id: 'Synth'},
+    {title: 'FMSynth', id: 'FMSynth'},
+    {title: 'AMSynth', id: 'AMSynth'},
+    {title: 'DuoSynth', id: 'DuoSynth'},
+    {title: 'MembraneSynth', id: 'MembraneSynth'},
+    {title: 'MetalSynth', id: 'MetalSynth'},
+    {title: 'NoiseSynth', id: 'NoiseSynth'},
+    {title: 'PluckSynth', id: 'PluckSynth'},
+  ];
 
   let selectedSingleSample;
   let selectedSoundKit;
   let selectedFrequencyKit;
   let selectedImpulse
   let selectedEffect;
+  let selectedSynth;
 
   let disable = false
   let keys = cloneDeep(keysDefault);  
@@ -43,6 +54,8 @@
             } else {
               console.log('No sound assigned to key')
             }
+          } else if(selectedSynth){
+            playSynth(key.freq)
           } else {
             if(selectedSingleSample){
               const playbackRate = Number(key.freq) / Number(selectedSingleSample.base_frequency)
@@ -76,6 +89,8 @@
             } else {
               console.log('No sound assigned to key')
             }
+          } else if(selectedSynth){
+            stopSynth(key.freq)
           } else {
             stopNote(key.note, isFade)
           }
@@ -131,6 +146,16 @@
     loadingLock('on')
     await loadImpulse(event.detail.file, 'keys')
     loadingLock('off')
+  }
+
+  const handleSelectSynth = (event) => {
+    selectedSynth = event.detail
+    loadSynth(event.detail.id)
+  }
+
+  const handleClearSynth = (event) => {
+    selectedSynth = null
+    clearSynth(event.detail.id)
   }
 
   const handleClearEffect = () => {
@@ -273,7 +298,7 @@
   <div class="select-container bigger">
     <div class="select">
       <Select
-        isDisabled={!!selectedFrequencyKit}
+        isDisabled={!!selectedFrequencyKit || !!selectedSynth}
         items={soundKits}
         optionIdentifier={idOptionIdentifier}
         {getSelectionLabel}
@@ -299,7 +324,7 @@
     </div>
     <div class="select">
       <Select
-        isDisabled={!!selectedSoundKit}
+        isDisabled={!!selectedSoundKit || !!selectedSynth}
         items={singleSamples}
         optionIdentifier={optionIdentifier}
         {getSelectionLabel}
@@ -312,9 +337,22 @@
     </div>
   </div>
 
-  <div class="select-container">
+  <div class="select-container bigger">
     <div class="select">
       <Select
+        items={synths}
+        {getSelectionLabel}
+        {getOptionLabel}
+        optionIdentifier={idOptionIdentifier}
+        bind:selectedSynth
+        on:clear={handleClearSynth}
+        on:select="{handleSelectSynth}"
+        placeholder="Effects: Synth"
+      ></Select>
+    </div>
+    <div class="select">
+      <Select
+        isDisabled={!!selectedSynth}
         items={impulses}
         {optionIdentifier}
         {getSelectionLabel}
@@ -327,6 +365,7 @@
     </div>
     <div class="select">
       <Select
+        isDisabled={!!selectedSynth}
         items={effects}
         optionIdentifier={idOptionIdentifier}
         {getSelectionLabel}

@@ -5,7 +5,37 @@ import { getTunaEffect } from "./init-tuna-effects";
 import Tuna from "tunajs"
 import smoothfade from 'smoothfade'
 import { sendData } from './api'
+import * as Tone from 'tone'
 
+window.Tone = Tone
+
+async function initTone(){
+	await Tone.start()
+}
+
+function loadSynth(synth){
+	window.sonoStore.synth = new Tone[synth]().toDestination();
+}
+
+function clearSynth(){
+	window.sonoStore.synth = null
+}
+
+function playSynth(freq){
+	if(window.sonoStore.synth){
+		const synth = window.sonoStore.synth
+		const now = Tone.now()
+		synth.triggerAttack(freq, now)
+	}
+}
+
+function stopSynth(freq){
+	if(window.sonoStore.synth){
+		const synth = window.sonoStore.synth
+		const now = Tone.now()
+		synth.triggerRelease(now)
+	}
+}
 
 function initSono() {
 	const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -13,6 +43,7 @@ function initSono() {
 	window.sonoStore = {};
 	window.tuna = new Tuna(window.audioCtx);
 	window.globalGain = audioCtx.createGain()
+	initTone()
 }
 
 function initRecorder(){
@@ -38,6 +69,7 @@ function recorderBroadcast (e) {
     window.connection.send(chunk);
   }
 };
+
 
 function stopNote(note, isFade) {
 	if (sonoStore[`${note}_osc`] && sonoStore[`${note}_osc`].isPlaying) {
@@ -401,5 +433,9 @@ export {
 	loadImpulse,
 	clearImpulse,
 	initRecorder,
-	stopRecorder
+	stopRecorder,
+	loadSynth,
+	clearSynth,
+	playSynth,
+	stopSynth
 };

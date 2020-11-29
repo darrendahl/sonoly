@@ -3,6 +3,11 @@ import { setup } from "axios-cache-adapter";
 
 const BASE_URL = "https://sonolib.onrender.com";
 
+const NODE_BASE_URL =
+  process.env === "dev"
+    ? "http://127.0.0.1:3001"
+    : "https://sonoly-node.onrender.com";
+
 // if developing locally, still can use public api
 // but if have sonolib up running and want to connect
 
@@ -50,6 +55,10 @@ export function loadFrequencyKits() {
 
 export function loadLoops() {
   return api.get("/sounds/loops/").then(response => response.data);
+}
+
+export function getActiveLivestreams(){
+  return axios.get(`${NODE_BASE_URL}/sessions`).then(response => response.data)
 }
 
 export default api;

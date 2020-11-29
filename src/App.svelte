@@ -2,17 +2,26 @@
 	import Pad from './Pad.svelte'	
 	import Keys from './Keys.svelte'
 	import Looper from './Looper.svelte'
-	import {onMount} from 'svelte'
+	import {onMount, onDestroy} from 'svelte'
 	import { initSono } from './sono'
+	import { listeners, broadcastStatus } from './stores'
+	import { getActiveLivestreams } from './api'
+	import { hri } from 'human-readable-ids'
 	import {startBroadcast, listen2Broadcast, initWsConnection, closeBroadcast } from './broadcaster'
 	const components = ['Keys', 'Loopers', 'Pad'];
 	import shortid from 'shortid'
-
-	let existingSessions = null
+	let existingSessions = []
+	let activeListeners = []
 	let currentInstr = ''
 	let started = false
 	let currentBc = null
 	let isListener = false
+	let bcStatus = false
+
+	const BASE_SONO_URL =
+	  process.env === "dev"
+	    ? "http://localhost:5000"
+	    : "https://sono.ly";
 
 	function setComponent(comp){
 		currentInstr = comp
@@ -24,33 +33,63 @@
 		currentInstr = 'Keys'
 	}
 
+	function copy(text) {
+	    var input = document.createElement('textarea');
+	    input.innerHTML = text;
+	    document.body.appendChild(input);
+	    input.select();
+	    var result = document.execCommand('copy');
+	    document.body.removeChild(input);
+	    return result;
+	}
+
 	function handleStartBroadcast(){
 		// TODO: Implement multiple sessions
 		// currentBc = shortid.generate()
-		currentBc = 'livestream'
-		initWsConnection(true)
+		currentBc = hri.random()
+		initWsConnection(true, currentBc)
 		window.history.replaceState('', '', currentBc)
 	}
 
-	function handleCloseBroadcast(){
+	function handleCloseBroadcast(returnHome){
 		closeBroadcast()		
 		currentBc = null
 		window.history.replaceState('', '', '')
-		isListener = false
+		isListener = false		
+
+		if(returnHome){
+			window.location = '/'
+		}
 	}
 
 	function startListening(){
-		initWsConnection(false)
+		initWsConnection(false, currentBc)
 		start()
 		started = true
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		const bcId = window.location.pathname.split('/').slice(1)[0]
 		if(!!bcId && !currentBc){
 			isListener = true
 			currentBc = bcId
-		}	
+		} else {
+			existingSessions = await getActiveLivestreams()
+		}
+	})
+
+
+	const unsubscribeL = listeners.subscribe((value) => {
+		activeListeners = value
+	})
+
+	const unsubscribeBs = broadcastStatus.subscribe((value) => {
+		bcStatus = value
+	})
+
+	onDestroy(() => {
+		unsubscribeL()
+		unsubscribeBs()
 	})
 
 	const gohome = () => {
@@ -66,9 +105,14 @@
 			Start Session
 		</div>
 
-		<div id="sessions">
-			
-		</div>
+		{#if existingSessions.length > 0}
+			<div class="sessions">
+				<div class="sessions-header">Or listen to active livestreams:</div>
+				{#each existingSessions as session}
+					<a href={session}><div  class="tab">{session}'s livestream</div></a>
+				{/each}
+			</div>
+		{/if}
 	{:else if !started && isListener}
 		<div class="tab start" on:click={startListening}>
 			Start Listening
@@ -78,7 +122,7 @@
 		<section class="block-container {isListener ? 'listener' : null}">
 
 				{#if isListener}
-					<div class="listen-header">Listening to Darren's Livestream...</div>
+					<div class="listen-header">{bcStatus === false ? `Listening to ${currentBc}'s Livestream...` : bcStatus}</div>
 				{/if}
 			 <header>
 				{#each components as comp}
@@ -95,17 +139,20 @@
 				<Pad />
 			</div>
 		</section>
-	<section class="broadcast-controls">
+
+		{#if currentBc && !isListener}
+			<div style="margin-top: 12px;">Livestreaming to {BASE_SONO_URL}/{currentBc} <span class="copy" on:click={() => copy(`${BASE_SONO_URL}/${currentBc}`)}>copy</span></div>
+		{/if}
+		<section class="broadcast-controls">
 			{#if currentBc && !isListener}
-				<div style="margin-bottom: 12px;">Livestreaming to https://sono.ly/{currentBc}</div>
 				<div class="tab" on:click={handleCloseBroadcast}>
 						Stop Livestream
 				</div>
 			{/if}
 
 			{#if currentBc && isListener}
-				<div class="tab" on:click={handleCloseBroadcast}>
-						Stop Listening
+				<div class="tab" on:click={() => handleCloseBroadcast(true)}>
+						Return Home
 				</div>
 			{/if}
 
@@ -114,9 +161,17 @@
 						Start Livestreaming
 				</div>
 			{/if}
+
+			{#if activeListeners.length > 0}
+				<div><div>Active Listeners</div>
+					{#each activeListeners as al}
+						<div>{al}</div>
+					{/each}
+				</div>
+			{/if}
 		</section>
 		<footer>
-			<a href="https://sonolib.onrender.com" target="_blank">View Sound Library</a>
+			<a href="https://sonolib.onrender.com" target="_blank"><div class="tab">View Sound Library</div></a>
 		</footer>
 	{/if}
 
@@ -144,9 +199,28 @@
 		margin-top: 50px;
 		margin-bottom: 12px;
 	}
+	.sessions-header{
+		margin-bottom: 12px;
+	}
 
-	#sessions {
-		margin-top: 48px;
+	.sessions {
+		margin: 0 auto;
+		width: 250px;
+		margin-top: 64px;
+	}
+
+	footer {
+		width: 200px;
+		margin: 0 auto;
+	}
+
+	.sessions a, footer a {
+		color: #333;
+	}
+
+	.sessions a:hover, footer a:hover{
+		color: white;
+		text-decoration: none;
 	}
 
 	.start {
@@ -159,6 +233,19 @@
 		display: none;
 	}
 
+	.copy {
+		border: 1px solid #bababa;
+		padding: 2px;
+		font-size: 12px;
+		margin-left: 12px;
+		cursor: pointer;
+	}
+
+	.copy:hover{
+		opacity: 0.9;
+		background: #bababa;
+	}
+
 	.show {
 		display: block;
 	}
@@ -167,6 +254,10 @@
 		border: 1px solid #ff3e00;
 		padding: 4px;
 		cursor: pointer;
+	}
+
+	.sessions .tab {
+		margin-bottom: 12px;
 	}
 
 	.block-container {

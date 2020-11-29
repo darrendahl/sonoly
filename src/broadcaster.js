@@ -1,4 +1,6 @@
 import { initRecorder, stopRecorder } from "./sono";
+import { listeners, broadcastStatus } from './stores'
+import { hri } from 'human-readable-ids'
 
 let init = false;
 let audioCache = [];
@@ -9,9 +11,15 @@ const WS_BASE_URL =
     ? "ws://127.0.0.1:3001"
     : "wss://sonoly-node.onrender.com";
 
-export function initWsConnection(isBroadcaster) {
+export function initWsConnection(isBroadcaster, sessionId) {
   window.WebSocket = window.WebSocket || window.MozWebSocket;
-  window.connection = new WebSocket(`${WS_BASE_URL}/broadcast`);
+  if(isBroadcaster){
+    window.connection = new WebSocket(`${WS_BASE_URL}/broadcast?sessionId=${sessionId}&role=broadcaster`);
+  } else {
+    const listenerId = hri.random()
+    window.connection = new WebSocket(`${WS_BASE_URL}/broadcast?sessionId=${sessionId}&role=listener&listenerId=${listenerId}`);
+  }
+
   window.connection.binaryType = "arraybuffer";
 
   connection.onopen = function() {
@@ -27,10 +35,13 @@ export function startBroadcast(recording = true) {
   window.recording = true;
   initRecorder();
 
-  window.connection.send("Started broadcast. You are the broadcaster");
+  window.connection.send('broadcast started');
 
   window.connection.onmessage = function(message) {
-    console.log(message.data);
+    console.log(message)
+    const newListeners = JSON.parse(message.data).map(d => d.listenerId)
+    console.log(newListeners)
+    listeners.update(l => newListeners)
   };
 
   connection.onerror = function(error) {
@@ -51,7 +62,9 @@ export function listen2Broadcast() {
 
   window.connection.onmessage = function(message) {
     if (typeof message.data === "string") {
-      console.log(message.data);
+      if(message.data === 'Broadcast has ended'){
+        broadcastStatus.update(b => message.data)
+      }
       return;
     }
 
@@ -80,6 +93,7 @@ export function listen2Broadcast() {
         soundController.nextTime =
           soundController.speakerContext.currentTime + 0.05;
       }
+      // console.log(source)
       source.start(soundController.nextTime);
       // schedule buffers to be played consecutively
       soundController.nextTime += source.buffer.duration;

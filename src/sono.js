@@ -10,6 +10,7 @@ import * as Tone from 'tone'
 window.Tone = Tone
 
 async function initTone(){
+	Tone.setContext(window.audioCtx)
 	await Tone.start()
 }
 
@@ -25,6 +26,9 @@ function playSynth(freq){
 	if(window.sonoStore.synth){
 		const synth = window.sonoStore.synth
 		const now = Tone.now()
+		if(window.merger){
+			synth.connect(window.merger)
+		}
 		synth.triggerAttack(freq, now)
 	}
 }
@@ -49,7 +53,7 @@ function initSono() {
 function initRecorder(){
 	const bufferSize = 2048;
 	window.recorder = audioCtx.createScriptProcessor(bufferSize, 1, 1)
-	window.merger = audioCtx.createChannelMerger()
+	window.merger = audioCtx.createChannelMerger(10)
 	recorder.onaudioprocess = recorderBroadcast
 	globalGain.connect(recorder)
 	merger.connect(recorder)
@@ -65,7 +69,7 @@ function recorderBroadcast (e) {
   const left = e.inputBuffer.getChannelData(0);
   if (window.recording === true) {
     const chunk = left;
-    console.log('broadcasting data...')
+    console.log('broadcasting data...', chunk)
     window.connection.send(chunk);
   }
 };
@@ -99,6 +103,9 @@ function playNote(freq, note) {
 	isPlaying = sonoStore[`${note}_osc`].isPlaying;
 	osc.frequency.value = freq;
 
+	if(window.merger){
+		gain.connect(merger)
+	}
 	osc.connect(gain);
 	gain.connect(audioCtx.destination);
 	gain.gain.value = 0.3;
@@ -108,7 +115,7 @@ function playNote(freq, note) {
 		const effect = sonoStore.currentEffect_keys.effect;
 		gain.connect(effect);
 		if(window.merger){
-			effect.connect(merger, 0, 0)
+			effect.connect(merger)
 		}
 		effect.connect(audioCtx.destination);
 	}
@@ -118,7 +125,7 @@ function playNote(freq, note) {
 		// osc.connect(impulseNode);
 		gain.connect(impulseNode)
 		if(window.merger){
-			impulseNode.connect(merger, 0, 1)
+			impulseNode.connect(merger)
 		}
 		impulseNode.connect(audioCtx.destination);
 	}
@@ -159,7 +166,7 @@ function playSweep({ x, y }, wavetableData) {
 	if (sonoStore.currentEffect_pad) {
 		const effect = sonoStore.currentEffect_pad.effect;
 		if(window.merger){
-			effect.connect(merger, 0, 2)
+			effect.connect(merger)
 		}
 		osc.connect(effect);
 		effect.connect(audioCtx.destination);
@@ -168,10 +175,14 @@ function playSweep({ x, y }, wavetableData) {
 	if (sonoStore.currentImpulse_pad) {
 		const impulseNode = sonoStore.currentImpulse_pad.source;
 		if(window.merger){
-			impulseNode.connect(merger, 0, 3)
+			impulseNode.connect(merger)
 		}
 		osc.connect(impulseNode);
 		impulseNode.connect(audioCtx.destination);
+	}
+
+	if(window.merger){
+		gain.connect(merger)
 	}
 
 	osc.connect(gain);
@@ -235,7 +246,7 @@ function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0, playbackR
 	if (sonoStore.currentEffect_keys && instr === "keys") {
 		const effect = sonoStore.currentEffect_keys.effect;
 		if(window.merger){
-			effect.connect(merger, 0, 4)
+			effect.connect(merger)
 		}
 		source.connect(effect);
 		effect.connect(audioCtx.destination);
@@ -244,13 +255,17 @@ function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0, playbackR
 	if (sonoStore.currentImpulse_keys && instr === "keys") {
 		const impulseNode = sonoStore.currentImpulse_keys.source;
 		if(window.merger){
-			impulseNode.connect(merger, 0, 5)
+			impulseNode.connect(merger)
 		}
 		source.connect(impulseNode);
 		impulseNode.connect(audioCtx.destination);
 	}
 
 	source.loop = isLoop;
+
+	if(window.merger){
+		source.connect(merger)		
+	}
 
 	source.connect(gain);
 	gain.connect(audioCtx.destination);

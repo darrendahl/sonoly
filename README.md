@@ -1,5 +1,9 @@
 ### https://sono.ly is a collection of instruments you can play with your keyboard and mouse and livestream to anyone.
 
+#### DEMO:
+[![Sono.ly video demo](https://i.imgur.com/eAyVz0F.png)](https://www.youtube.com/watch?v=ypBi8fA_YBM)
+
+
 ### To get started locally
 
 ```
@@ -22,15 +26,15 @@ Sono.ly has 3 instruments by default: Keys, Loopers, and Pad.
 
 ### Important distinctions from sono.ly and other music making applications.
 
-1. There is no recording natively in the app. This is not a DAW, or Digital Audio Workstation, like GarageBand and others. We are not composing professional grade music using sono.ly. Sono.ly is about jamming, experimenting, discovering, and playing live in the moment. Livestreaming allows others to sit in on your sessions. That being said, no one is stopping you from recording a screen capture video of your sono.ly sessions using Soundflower, Kap or some other software.
+1. This is not a DAW, or Digital Audio Workstation, like GarageBand and others. We are not composing professional grade music using sono.ly. Sono.ly is about jamming, experimenting, discovering, and playing live in the moment. Livestreaming allows others to sit in on your sessions. We don't record full songs on Sono.ly natively in the app. That being said, no one is stopping you from recording a screen capture video of your sono.ly sessions using Soundflower, Kap or some other software.
 
-2. Because there is no recording, we won’t have any timelines or waveforms in the app. Again, sono.ly is not a DAW. We are building instruments that can be played with your keyboard and mouse, and then livestream to anyone. We are not building software to compose beats and songs. 
+2. We don’t have any timelines or waveforms in the app. Again, sono.ly is not a DAW. We are building instruments that can be played with your keyboard and mouse, and then livestream to anyone. We are not building software to compose beats and songs. 
 
 ----------
 
 ### Architecture 
 
-There is a backend Django application and a Node.js middle layer application in separate repos and a frontend Svelte application in this repo. In order to get the entire application working you will have to clone all three, but you can use default sounds and mock responses available in this repo and have the app working without the backend. 
+There is a backend Django application and a Node.js middle layer application in separate repos and a frontend Svelte application in this repo. In order to get the entire application working locally you will have to clone all three, but you can use https://sonolib.onrender.com for the sounds, as it is a public rest api. 
 
   - The Backend https://github.com/bluedahltech/sonolib/ is for managing the sound library and data models that the frontend instruments consume, hosted at https://sonolib.onrender.com
 

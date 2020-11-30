@@ -255,7 +255,7 @@
 
 	.tab{
 		border: 1px solid #ff3e00;
-		padding: 4px;
+		padding: 4px 8px;
 		cursor: pointer;
 	}
 

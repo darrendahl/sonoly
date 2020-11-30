@@ -34,7 +34,7 @@ Sono.ly has 3 instruments by default: Keys, Loopers, and Pad.
 
 ### Architecture 
 
-There is a backend Django application and a Node.js middle layer application in separate repos and a frontend Svelte application in this repo. In order to get the entire application working you will have to clone all three, but you can use default sounds and mock responses available in this repo and have the app working without the backend. 
+There is a backend Django application and a Node.js middle layer application in separate repos and a frontend Svelte application in this repo. In order to get the entire application working locally you will have to clone all three, but you can use https://sonolib.onrender.com for the sounds, as it is a public rest api. 
 
   - The Backend https://github.com/bluedahltech/sonolib/ is for managing the sound library and data models that the frontend instruments consume, hosted at https://sonolib.onrender.com
 

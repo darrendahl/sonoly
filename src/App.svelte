@@ -177,9 +177,6 @@
 				</div>
 			{/if}
 		</section>
-		<footer>
-			<a href="https://sonolib.onrender.com" target="_blank"><div class="tab">View Sound Library</div></a>
-		</footer>
 	{/if}
 
 </main>

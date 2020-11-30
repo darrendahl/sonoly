@@ -257,7 +257,7 @@
   .key {
     border: 1px solid #ff3e00;
     cursor: pointer;
-    padding: 10px;
+    padding: 8px 12px;
     margin: 0 4px;
     background: white;
   }

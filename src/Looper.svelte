@@ -165,7 +165,6 @@
   }
 
   .bpm{
-    height: 28px;
     width: 80px;
     margin: 0;
     border: 1px solid #ff0000;

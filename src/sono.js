@@ -69,7 +69,7 @@ function recorderBroadcast (e) {
   const left = e.inputBuffer.getChannelData(0);
   if (window.recording === true) {
     const chunk = left;
-    console.log('broadcasting data...', chunk)
+    // console.log('broadcasting data...', chunk)
     window.connection.send(chunk);
   }
 };

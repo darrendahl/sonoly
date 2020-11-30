@@ -2,6 +2,8 @@
 	import Pad from './Pad.svelte'	
 	import Keys from './Keys.svelte'
 	import Looper from './Looper.svelte'
+	import Navbar from './Navbar.svelte'
+	import Sidebar from './Sidebar.svelte'
 	import {onMount, onDestroy} from 'svelte'
 	import { initSono } from './sono'
 	import { listeners, broadcastStatus } from './stores'
@@ -96,7 +98,12 @@
 		window.location = '/'
 	}
 
+	let open = false
+
 </script>
+
+<Sidebar bind:open/>
+<Navbar bind:sidebar={open}/>
 
 <main id="main">
 	<h1 class="pointer" on:click={gohome}>Sono.ly</h1>
@@ -226,7 +233,6 @@
 	.start {
 		width: 150px; 
 		margin: 0 auto; 
-		margin-top: -24px; 
 	}
 
 	.hide {

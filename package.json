@@ -29,6 +29,7 @@
     "sirv-cli": "^1.0.0",
     "smoothfade": "^1.1.1",
     "svelte-select": "^3.14.0",
+    "tailwindcss": "^2.0.1",
     "tone": "^14.7.58",
     "tunajs": "^1.0.13"
   }

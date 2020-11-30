@@ -38,9 +38,7 @@ export function startBroadcast(recording = true) {
   window.connection.send('broadcast started');
 
   window.connection.onmessage = function(message) {
-    console.log(message)
     const newListeners = JSON.parse(message.data).map(d => d.listenerId)
-    console.log(newListeners)
     listeners.update(l => newListeners)
   };
 

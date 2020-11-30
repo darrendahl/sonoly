@@ -269,7 +269,9 @@ function playSound(playerId, instr, isLoop = false, timeUntilPlay = 0, playbackR
 
 	source.connect(gain);
 	gain.connect(audioCtx.destination);
-	gain.gain.value = 0.5;
+	if(instr === "keys"){
+		gain.gain.value = 0.5;
+	}
 	
 
 	source.start(audioCtx.currentTime + timeUntilPlay);

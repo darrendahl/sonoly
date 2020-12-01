@@ -1,5 +1,7 @@
 <script>
   // Advanced Keys Settings:
+  // Record loop if looper is playing. Set number of bars to record and then loopers appear underneath  keys once loop is recorded
+  // Hold space - if space is held, play note without stopping, otherwise stop
   // Include detune pad
   // Include numbers and space
   // Manually adjust frequencies

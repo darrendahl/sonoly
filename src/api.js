@@ -57,8 +57,8 @@ export function loadLoops() {
   return api.get("/sounds/loops/").then(response => response.data);
 }
 
-export function getActiveLivestreams(){
-  return axios.get(`${NODE_BASE_URL}/sessions`).then(response => response.data)
+export function getActiveLivestreams() {
+  return axios.get(`${NODE_BASE_URL}/sessions`).then(response => response.data);
 }
 
 export default api;

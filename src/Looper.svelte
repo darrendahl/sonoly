@@ -112,13 +112,17 @@
   }
 
   const handleSelect = async (event, looper) => {
+    const bpm = window.sonoStore.baseLoop ? window.sonoStore.baseLoop.loop.selected.bpm : event.detail.bpm
+    const originalBpm = event.detail.bpm
+    const playbackRate = Number(bpm) / Number(originalBpm)
     loopers = loopers.map((l) => {
       if(looper.title === l.title){
         return {
           ...l,
           selected: {
             ...event.detail,
-            originalBpm: event.detail.bpm
+            bpm,
+            originalBpm 
           }
         }
       } else {
@@ -126,7 +130,7 @@
       }
     })
     loadingLock('on')
-    await loadFile(event.detail.file, looper.id, 'looper')
+    await loadFile(event.detail.file, looper.id, 'looper', playbackRate)
     loadingLock('off')
   }
 

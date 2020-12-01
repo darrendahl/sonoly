@@ -1,6 +1,6 @@
 import { initRecorder, stopRecorder } from "./sono";
-import { listeners, broadcastStatus } from './stores'
-import { hri } from 'human-readable-ids'
+import { listeners, broadcastStatus } from "./stores";
+import { hri } from "human-readable-ids";
 
 let init = false;
 let audioCache = [];
@@ -13,11 +13,15 @@ const WS_BASE_URL =
 
 export function initWsConnection(isBroadcaster, sessionId) {
   window.WebSocket = window.WebSocket || window.MozWebSocket;
-  if(isBroadcaster){
-    window.connection = new WebSocket(`${WS_BASE_URL}/broadcast?sessionId=${sessionId}&role=broadcaster`);
+  if (isBroadcaster) {
+    window.connection = new WebSocket(
+      `${WS_BASE_URL}/broadcast?sessionId=${sessionId}&role=broadcaster`
+    );
   } else {
-    const listenerId = hri.random()
-    window.connection = new WebSocket(`${WS_BASE_URL}/broadcast?sessionId=${sessionId}&role=listener&listenerId=${listenerId}`);
+    const listenerId = hri.random();
+    window.connection = new WebSocket(
+      `${WS_BASE_URL}/broadcast?sessionId=${sessionId}&role=listener&listenerId=${listenerId}`
+    );
   }
 
   window.connection.binaryType = "arraybuffer";
@@ -35,11 +39,11 @@ export function startBroadcast(recording = true) {
   window.recording = true;
   initRecorder();
 
-  window.connection.send('broadcast started');
+  window.connection.send("broadcast started");
 
   window.connection.onmessage = function(message) {
-    const newListeners = JSON.parse(message.data).map(d => d.listenerId)
-    listeners.update(l => newListeners)
+    const newListeners = JSON.parse(message.data).map(d => d.listenerId);
+    listeners.update(l => newListeners);
   };
 
   connection.onerror = function(error) {
@@ -60,8 +64,8 @@ export function listen2Broadcast() {
 
   window.connection.onmessage = function(message) {
     if (typeof message.data === "string") {
-      if(message.data === 'Broadcast has ended'){
-        broadcastStatus.update(b => message.data)
+      if (message.data === "Broadcast has ended") {
+        broadcastStatus.update(b => message.data);
       }
       return;
     }

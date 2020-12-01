@@ -13,8 +13,9 @@
 
 <style>
 	aside {
+		z-index: 10;
 		left: -100%;
-		transition: left 0.3s ease-in-out
+		transition: left 0.3s ease-in-out;
 	}
 
 	.header{
@@ -22,6 +23,6 @@
 	}
 	
 	.open {
-		left: 0
+		left: 0;
 	}
 </style>

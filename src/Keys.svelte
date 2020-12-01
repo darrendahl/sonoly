@@ -1,7 +1,7 @@
 <script>
-  // Advanced Keys Settings:
-  // Record loop if looper is playing. Set number of bars to record and then loopers appear underneath  keys once loop is recorded
+  // Advanced Keys Features:
   // Hold space - if space is held, play note without stopping, otherwise stop
+  // Record loop from keys if looper is playing. Set number of bars to record and then looper appears underneath keys after loop is recorded
   // Include detune pad
   // Include numbers and space
   // Manually adjust frequencies
@@ -43,12 +43,20 @@
   let selectedSynth;
 
   let disable = false
-  let keys = cloneDeep(keysDefault);  
+  let keys = cloneDeep(keysDefault); 
+
+  let keyMap = {} 
 
   function pressKeyDown(e) {
+
+    const code = String(e.keyCode) 
+    keyMap[code] = e.type
+
     keys = keys.map(row =>
       row.map(key => {
         const newSelected = key.selected ? key.selected : key.code === e.keyCode;
+
+        // Web audio api related
         if (newSelected) {
           if(selectedSoundKit){
             if(key.uuid){
@@ -57,14 +65,12 @@
               console.log('No sound assigned to key')
             }
           } else if(selectedSynth){
-            playSynth(key.freq)
+              playSynth(key.freq)
+          } else if(selectedSingleSample) {
+            const playbackRate = Number(key.freq) / Number(selectedSingleSample.base_frequency)
+            playSound('freqkit_sound', 'keys', false, 0, playbackRate)
           } else {
-            if(selectedSingleSample){
-              const playbackRate = Number(key.freq) / Number(selectedSingleSample.base_frequency)
-              playSound('freqkit_sound', 'keys', false, 0, playbackRate)
-            } else {
-              playNote(key.freq, key.note);
-            }
+            playNote(key.freq, key.note);
           }
         }
 
@@ -74,9 +80,12 @@
         };
       })
     );
-  }
+  }  
 
   function pressKeyUp(e) {
+
+    const code = String(e.keyCode) 
+    keyMap[code] = e.type
 
     const isFade = true
     keys = keys.map(row =>
@@ -84,17 +93,23 @@
         const isKey = key.code === e.keyCode && key.selected
         const newSelected = isKey ? false : key.selected
 
+        // Web audio api related
         if(isKey){
           if(selectedSoundKit){
-            if(selectedSingleSample){
-              stopSound(key.code)
+            if(key.uuid){
+              // TODO: implement once space holding is implmented
+              // stopSound(key.code, 'keys')
             } else {
               console.log('No sound assigned to key')
             }
           } else if(selectedSynth){
+            // TODO: Logic here is not correct, since it is a mono synth
             stopSynth(key.freq)
+          } else if(selectedSingleSample) {
+            // TODO: needs to be refactored so each key has a buffersource
+            // stopSound('freqkit_sound', 'keys', 0)
           } else {
-            stopNote(key.note, isFade)
+            stopNote(key.note, isFade);
           }
         }
 
@@ -157,7 +172,7 @@
 
   const handleClearSynth = (event) => {
     selectedSynth = null
-    clearSynth(event.detail.id)
+    clearSynth()
   }
 
   const handleClearEffect = () => {

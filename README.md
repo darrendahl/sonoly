@@ -3,7 +3,7 @@
 Sono.ly é uma coleção de instrumentos que você pode tocar com o teclado e mouse e transmitir ao vivo para qualquer pessoa.
 
 #### DEMO:
-[![Sono.ly video demo](https://i.ibb.co/X3HSZnx/Screen-Shot-2020-12-02-at-4-50-38-PM.png)](https://www.youtube.com/watch?v=c83sUM6eWOU)
+[![Sono.ly video demo](https://i.postimg.cc/fyDhMrht/Screen-Shot-2020-12-02-at-4-57-32-PM.png)](https://www.youtube.com/watch?v=c83sUM6eWOU)
 
 
 ### To get started locally

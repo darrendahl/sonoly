@@ -7,7 +7,7 @@
 		<div class="header">Sono.ly is a collection of instruments you can play with your keyboard or mouse and livestream to anyone.</div>
 		<a class="block" href="https://sonolib.onrender.com">Sound Library</a>
 		<a class="block" href="https://github.com/bluedahltech/sono.ly">Github</a>
-		<a class="block" href="https://youtube.com/watch?v=ypBi8fA_YBM">Demo</a>
+		<a class="block" href="https://youtube.com/watch?v=c83sUM6eWOU">Demo</a>
 	</nav>
 </aside>
 
